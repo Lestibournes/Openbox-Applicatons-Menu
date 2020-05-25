@@ -1,0 +1,56 @@
+{
+    "global": {
+        "directories": "/usr/share/applications",
+        "language": "en, he",
+        "environments": "Unity, Unity7",
+        "sorting": "ascending",
+        "icons": {
+            "minimum": "24",
+            "maximum": "48",
+            "direction": "increasing"
+        }
+    },
+
+    "menus": {
+        "Internet": {
+            "icon": "",
+            "categories": "Network, X-GNOME-WebApplications",
+            "exclude": ""
+        },
+        "Games": {
+            "icon": "",
+            "categories": "Game, BlocksGames, ActionGames, CardGames, AdventureGames, StrategyGames, RolePlayingGames, ArcadeGames, KidsGames, LogicGames, SimulationGames, BoardGames, SportsGames",
+            "exclude": ""
+        },
+        "Media": {
+            "icon": "",
+            "categories": "Graphics, AudioVideo, Audio, Video, Recorder",
+            "exclude": ""
+        },
+        "Development": {
+            "icon": "",
+            "categories": "Development",
+            "exclude": ""
+        },
+        "Office": {
+            "icon": "",
+            "categories": "Office",
+            "exclude": ""
+        },
+        "System": {
+            "icon": "",
+            "categories": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings",
+            "exclude": ""
+        },
+        "Settings": {
+            "icon": "",
+            "categories": "Settings, unitycc, Personal",
+            "exclude": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings"
+        },
+        "Utilities": {
+            "icon": "",
+            "categories": "Utility, Utility-Accessibility, X-GNOME-Utilities, X-GNOME-Menu-Applications",
+            "exclude": ""
+        }
+    }
+}
