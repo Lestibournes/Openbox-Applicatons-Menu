@@ -136,8 +136,12 @@ for file in files:
 
 		# Select the name:
 		for lang in langs:
-			if lang in application["names"]:
+			if lang.startswith("en"):
+				application["name"] = application["names"]["default"]
+				break
+			elif lang in application["names"]:
 				application["name"] = application["names"][lang]
+				break
 
 		if not application["name"]: application["name"] = application["names"]["default"]
 
@@ -207,7 +211,7 @@ for file in files:
 				application["icon"]["selected"] = file
 				break
 		
-		if not application["icon"]["selected"]: application["icon"]["selected"] = application["icon"]["scalable"]
+		if not application["icon"]["selected"] and application["icon"]["scalable"]: application["icon"]["selected"] = application["icon"]["scalable"][0]
 
 		# Add to menus:
 		results = []
@@ -226,9 +230,9 @@ output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="htt
 for menu in menus:
 	output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
 
-	for app in menus[menu]:
-		output += '\t<item label="Archive Manager" icon="/usr/share/icons/Faenza/apps/32/file-roller.png">\n'
-		output += '\t\t<action name="Execute"><command><![CDATA[file-roller]]></command></action>\n'
+	for app in menus[menu]["applications"]:
+		output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
+		output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 		output += '\t</item>\n'
 
 	output += '</menu>\n'

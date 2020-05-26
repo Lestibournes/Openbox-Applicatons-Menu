@@ -7,8 +7,10 @@
         "icons": {
             "minimum": "24",
             "maximum": "48",
-            "direction": "increasing"
-        }
+            "direction": "increasing",
+            "preference": "bigger"
+        },
+        "theme": "ubuntu-mono-dark"
     },
 
     "menus": {
