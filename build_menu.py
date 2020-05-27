@@ -1,6 +1,3 @@
-# NoDisplay=true
-# OnlyShowIn=Unity;
-
 import glob
 import json
 import re
@@ -85,9 +82,7 @@ def getName(file, langs):
 
 	for lang in langs:
 		if lang in names:
-			# print("lang: " + lang + ", name: " + names[lang] + ", File: " + file)
 			return names[lang]
-	# print("lang: none, default name: " + default + ", File: " + file)
 	return default
 
 def getIcon(file):
@@ -207,8 +202,6 @@ def getIconFromTheme(icon, theme):
 	return files
 
 def getIconPaths(icon):
-	# gsettings get org.mate.interface icon-theme
-	# gsettings get org.gnome.desktop.interface icon-theme
 	theme = Gio.Settings.new("org.gnome.desktop.interface").get_string("icon-theme")
 	return getIconFromTheme(icon, theme)
 
@@ -218,7 +211,6 @@ def getIconPathBySize(icon, icons, min, max, direction):
 			size = min
 		else:
 			size = max
-		#\/usr\/share\/icons\/(.+)\/(?:scalable\/)?(\d+)(?:x\d+(?:@2x)?)?\/(.*)\.(.+)
 		fixed = re.compile(r'\/usr\/share\/icons\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)\.(.+)')
 
 		for path in icons:
@@ -246,9 +238,8 @@ def getIconPathBySize(icon, icons, min, max, direction):
 
 def getIconFromDirectory(icon, directory):
 	extensions = [".png", ".svg", ".xpm"]
+
 	files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(directory) for f in filenames if (os.path.splitext(f)[0] == icon and os.path.splitext(f)[1] in extensions) or f == icon]
-	print(icon)
-	print(files)
 	return files
 
 #where to write out the xml:
@@ -307,7 +298,9 @@ for app in apps:
 				icon_path = getIconFromDirectory(icon, "/usr/share/pixmaps/")
 
 			if not icon_path:
-				icon_path = getIconFromDirectory(icon, "/usr/share/applications/")
+				icon_path = getIconFromDirectory(icon, "/usr/share/icons/")
+				if icon_path:
+					icon_path = icon_path[0]
 
 			menus[menu][name] = {
 				"icon": icon_path,
@@ -315,4 +308,4 @@ for app in apps:
 			}
 
 
-# printMenus(menus, config)
+printMenus(menus, config)

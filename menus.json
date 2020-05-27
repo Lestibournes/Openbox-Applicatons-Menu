@@ -8,49 +8,51 @@
             "minimum": "24",
             "maximum": "48",
             "direction": "increasing",
-            "preference": "bigger"
+            "preference": "bigger",
+            "themes": "/usr/share/icons",
+            "folders": "/usr/share/icons,/usr/share/pixmaps"
         },
         "theme": "ubuntu-mono-dark"
     },
 
     "menus": {
         "Internet": {
-            "icon": "",
+            "icon": "applications-intenet",
             "categories": "Network, X-GNOME-WebApplications",
             "exclude": ""
         },
         "Games": {
-            "icon": "",
+            "icon": "applications-games",
             "categories": "Game, BlocksGames, ActionGames, CardGames, AdventureGames, StrategyGames, RolePlayingGames, ArcadeGames, KidsGames, LogicGames, SimulationGames, BoardGames, SportsGames",
             "exclude": ""
         },
         "Media": {
-            "icon": "",
+            "icon": "applications-multimedia",
             "categories": "Graphics, AudioVideo, Audio, Video, Recorder",
             "exclude": ""
         },
         "Development": {
-            "icon": "",
+            "icon": "applications-development",
             "categories": "Development",
             "exclude": ""
         },
         "Office": {
-            "icon": "",
+            "icon": "applications-office",
             "categories": "Office",
             "exclude": ""
         },
         "System": {
-            "icon": "",
+            "icon": "applications-system",
             "categories": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings",
             "exclude": ""
         },
         "Settings": {
-            "icon": "",
+            "icon": "preferences-system",
             "categories": "Settings, unitycc, Personal",
             "exclude": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings"
         },
         "Utilities": {
-            "icon": "",
+            "icon": "applications-accessories",
             "categories": "Utility, Utility-Accessibility, X-GNOME-Utilities, X-GNOME-Menu-Applications",
             "exclude": ""
         }
