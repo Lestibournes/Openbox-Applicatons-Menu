@@ -8,7 +8,7 @@
             "minimum": "24",
             "maximum": "48",
             "preference": "bigger",
-            "themes": "~/.icons,/usr/share/icons",
+            "themes": "/usr/share/icons",
             "folders": "/usr/share/icons,/usr/share/pixmaps"
         },
         "theme": "ubuntu-mono-dark"
@@ -16,7 +16,7 @@
 
     "menus": {
         "Internet": {
-            "icon": "applications-intenet",
+            "icon": "applications-internet",
             "categories": "Network, X-GNOME-WebApplications",
             "exclude": ""
         },
