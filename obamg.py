@@ -64,6 +64,7 @@ for menu in config["menus"]:
 	else:
 		regex = re.compile(r'Inherits\s*=\s*(.+,(?:.+))')
 		themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
+
 		while len(themes) > 0:
 			theme = themes.pop(0)
 
@@ -72,7 +73,7 @@ for menu in config["menus"]:
 
 			if menus[menu]["icon"]["files"]: break
 
-			for line in open(theme + "/index.theme", "r").read().splitlines():
+			for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
 				match = regex.search(line.rstrip())
 
 				if (match):
@@ -80,8 +81,8 @@ for menu in config["menus"]:
 					break
 		
 		if not menus[menu]["icon"]["files"]:
-			for folder in config["global"]["icons"]["folders"]:
-				files = glob.glob(folder + "*")
+			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
+				files = glob.glob(os.path.join(folder, "*"))
 
 				if files:
 					for file in files:
@@ -248,10 +249,11 @@ for file in files:
 						break
 			
 			if not application["icon"]["files"]:
-				for folder in config["global"]["icons"]["folders"]:
-					files = glob.glob(folder + "*")
+				for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
+					files = glob.glob(os.path.join(folder, "*"))
 
 					if files:
+						print(files)
 						for file in files:
 							if os.path.isfile(file) and os.path.basename(file) == application["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == application["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
 								application["icon"]["selected"] = file
