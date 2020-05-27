@@ -7,7 +7,6 @@
         "icons": {
             "minimum": "24",
             "maximum": "48",
-            "direction": "increasing",
             "preference": "bigger",
             "themes": "/usr/share/icons",
             "folders": "/usr/share/icons,/usr/share/pixmaps"
