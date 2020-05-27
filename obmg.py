@@ -62,7 +62,7 @@ for menu in config["menus"]:
 	if os.path.isfile(menus[menu]["icon"]["name"]):
 		menus[menu]["icon"]["selected"] = menus[menu]["icon"]["name"]
 	else:
-		regex = re.compile(r'Inherits\s*=\s*(.+,(?:.+))')
+		regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
 		themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
 
 		while len(themes) > 0:
@@ -230,7 +230,7 @@ for file in files:
 		if os.path.isfile(application["icon"]["name"]):
 			application["icon"]["selected"] = application["icon"]["name"]
 		else:
-			regex = re.compile(r'Inherits\s*=\s*(.+,(?:.+))')
+			regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
 			themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
 			
 			while len(themes) > 0:
@@ -253,7 +253,6 @@ for file in files:
 					files = glob.glob(os.path.join(folder, "*"))
 
 					if files:
-						print(files)
 						for file in files:
 							if os.path.isfile(file) and os.path.basename(file) == application["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == application["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
 								application["icon"]["selected"] = file
