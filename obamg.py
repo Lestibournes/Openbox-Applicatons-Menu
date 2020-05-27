@@ -20,11 +20,9 @@ dirs = config["global"]["directories"].split(",")
 #icons parameters:
 min = int(config["global"]["icons"]["minimum"])
 max = int(config["global"]["icons"]["maximum"])
-direction = config["global"]["icons"]["direction"]
-fixed_icon_size = re.compile(r'\/usr\/share\/icons\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)\.(.+)')
-scalable_icon_size = re.compile(r'\/usr\/share\/icons\/(.+)\/scalable\/(.*)\.(.+)')
+fixed_icon_size = re.compile(r'\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)\.(.+)')
+scalable_icon_size = re.compile(r'\/(.+)\/scalable\/(.*)\.(.+)')
 extensions = [".png", ".svg", ".xpm"] # filename extensions for icon files
-
 
 #language preferences:
 langs = config["global"]["language"].split(",")
@@ -55,18 +53,17 @@ for menu in config["menus"]:
 	}
 
 	# Categories:
-	menus[menu]["categories"] = [value.lower().strip() for value in config["menus"][menu]["categories"].split(";") if value]
+	menus[menu]["categories"] = [value.lower().strip() for value in config["menus"][menu]["categories"].split(",") if value]
 
 	# Exclusions:
-	menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"].split(";") if value]
+	menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"].split(",") if value]
 
 	# Set the menu icon:
 	if os.path.isfile(menus[menu]["icon"]["name"]):
 		menus[menu]["icon"]["selected"] = menus[menu]["icon"]["name"]
 	else:
 		regex = re.compile(r'Inherits\s*=\s*(.+,(?:.+))')
-		themes = [config["global"]["icons"]["themes"] + "/" + config["global"]["theme"]]
-		
+		themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
 		while len(themes) > 0:
 			theme = themes.pop(0)
 
@@ -79,7 +76,7 @@ for menu in config["menus"]:
 				match = regex.search(line.rstrip())
 
 				if (match):
-					themes += [config["global"]["icons"]["themes"] + "/" + t.strip() for t in match.group(1).split(",")]
+					themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
 					break
 		
 		if not menus[menu]["icon"]["files"]:
@@ -93,7 +90,6 @@ for menu in config["menus"]:
 							break
 		
 		# Select the icon file to use:
-
 		menus[menu]["icon"]["scalable"] = [file for file in menus[menu]["icon"]["files"] if scalable_icon_size.search(file)]
 		menus[menu]["icon"]["files"] = [file for file in menus[menu]["icon"]["files"] if fixed_icon_size.search(file)]
 
@@ -234,7 +230,7 @@ for file in files:
 			application["icon"]["selected"] = application["icon"]["name"]
 		else:
 			regex = re.compile(r'Inherits\s*=\s*(.+,(?:.+))')
-			themes = [config["global"]["icons"]["themes"] + "/" + config["global"]["theme"]]
+			themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
 			
 			while len(themes) > 0:
 				theme = themes.pop(0)
@@ -244,11 +240,11 @@ for file in files:
 
 				if application["icon"]["files"]: break
 
-				for line in open(theme + "/index.theme", "r").read().splitlines():
+				for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
 					match = regex.search(line.rstrip())
 
 					if (match):
-						themes += [config["global"]["icons"]["themes"] + "/" + t.strip() for t in match.group(1).split(",")]
+						themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
 						break
 			
 			if not application["icon"]["files"]:
@@ -292,11 +288,7 @@ for file in files:
 			elif not application["icon"]["selected"] and application["icon"]["scalable"]: application["icon"]["selected"] = application["icon"]["scalable"][0]
 
 		# Add to menus:
-		results = []
 		for menu in config["menus"]:
-			menus[menu]["categories"] = [value.lower().strip() for value in config["menus"][menu]["categories"].split(",") if value]
-			menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"].split(",") if value]
-			
 			for category in application["categories"]:
 				if category in menus[menu]["exclusions"]: break
 				if category in menus[menu]["categories"]:

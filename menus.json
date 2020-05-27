@@ -8,7 +8,7 @@
             "minimum": "24",
             "maximum": "48",
             "preference": "bigger",
-            "themes": "/usr/share/icons",
+            "themes": "~/.icons,/usr/share/icons",
             "folders": "/usr/share/icons,/usr/share/pixmaps"
         },
         "theme": "ubuntu-mono-dark"
