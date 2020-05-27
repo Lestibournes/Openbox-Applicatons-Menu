@@ -1,4 +1,4 @@
-# Openbox Application Menu Generator
+# Openbox Menu Generator
 Generate applications pipemenu for Openbox
 
 The script takes a json config file as a parameter. A sample json config file is provided.
