@@ -1,5 +1,10 @@
 {
     "global": {
+		"files": {
+			"header": "",
+			"footer": "~/.config/openbox/system.xml",
+			"output": "~/.config/openbox/menu.applications.xml"
+		},
         "directories": "/usr/share/applications",
         "language": "en, he",
         "environments": "Unity, Unity7",
