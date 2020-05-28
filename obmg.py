@@ -8,10 +8,14 @@ import sys
 #initializations:
 #where to write out the xml:
 home = os.path.expanduser("~")
-destination_filename = home + "/.config/openbox/apps.xml"
+
+destination_filename = None
+
+if sys.argv[2]:
+	destination_filename = sys.argv[2].replace("~", home)
 
 #the config file:
-config_filename = sys.argv[1]
+config_filename = sys.argv[1].replace("~", home)
 config = json.loads(open(config_filename, "r").read())
 
 #where to read the .desktop files from:
@@ -64,15 +68,15 @@ for menu in config["menus"]:
 	else:
 		regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
 		themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
-
+		
 		while len(themes) > 0:
 			theme = themes.pop(0)
-
+			
 			extensions = [".png", ".svg", ".xpm"]
 			menus[menu]["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(theme) for f in filenames if os.path.splitext(f)[0] == menus[menu]["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-
+			
 			if menus[menu]["icon"]["files"]: break
-
+			
 			for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
 				match = regex.search(line.rstrip())
 
@@ -296,17 +300,45 @@ for file in files:
 					menus[menu]["applications"].append(application)
 					application["menus"].append(menu)
 
+# Create the xml:
+sort = False
+reverse = False
+
+if "sorting" in config["global"] and config["global"]["sorting"] == "ascending".lower():
+	sort = True
+elif "sorting" in config["global"] and config["global"]["sorting"] == "descending".lower():
+	sort = True
+	reverse = True
+
 output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/" >\n\n'
 
-for menu in menus:
-	output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
+if sort:
+	for menu in sorted(menus, key=lambda menu: menu, reverse=reverse):
+		if len(menus[menu]) > 0:
+			if len(menus[menu]["applications"]) > 0:
+				output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
 
-	for app in menus[menu]["applications"]:
-		output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
-		output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
-		output += '\t</item>\n'
+			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"], reverse=reverse):
+				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
+				output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
+				output += '\t</item>\n'
 
-	output += '</menu>\n'
+			output += '</menu>\n'
+else:
+	for menu in menus:
+		if len(menus[menu]["applications"]) > 0:
+			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
+
+			for app in menus[menu]["applications"]:
+				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
+				output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
+				output += '\t</item>\n'
+
+			output += '</menu>\n'
+
 output += '</openbox_pipe_menu>'
 
-print(output)
+if destination_filename:
+	open(destination_filename, "w").write(output)
+else:
+	print(output)

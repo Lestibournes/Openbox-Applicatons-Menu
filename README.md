@@ -1,11 +1,13 @@
 # Openbox Menu Generator
 Generate applications pipemenu for Openbox
 
-The script takes a json config file as a parameter. A sample json config file is provided.
+The script takes 2 parameters:
+* A json config file. A sample json config file is provided.
+* The destination files= where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
 Since it can take a few seconds, it is recommended not to execute the script each time the menu is openend. Instead, you can have the menu refresh when you log in, periodically with a cron job, or you can refresh it manually whenever you install or uninstall an application.
 
-for example, launch with:
-python obamg.py menus.json
+For example, launch with:
+python obamg.py menus.json menu.xml
 
 This script hasn't been thoroughly tested and there are many improvements that can be made.
 
