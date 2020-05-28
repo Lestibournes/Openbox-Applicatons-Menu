@@ -1,9 +1,8 @@
 # Openbox Menu Generator
 Generate applications pipemenu for Openbox
 
-The script takes 2 parameters:
-* A json config file. A sample json config file is provided.
-* The destination files= where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
+The script takes a json config file. A sample json config file is provided.
+
 Since it can take a few seconds, it is recommended not to execute the script each time the menu is openend. Instead, you can have the menu refresh when you log in, periodically with a cron job, or you can refresh it manually whenever you install or uninstall an application.
 
 For example, launch with:
@@ -13,6 +12,10 @@ This script hasn't been thoroughly tested and there are many improvements that c
 
 Explanation of the config file:
 * global - the variables affecting the the script as a whole.
+  * files - the various files to be used for input output, etc.
+    * header - menus to be inserted before the applications menus.
+    * footer - menus to be inserted after the applications menus.
+    * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
   * directories - a comma-separated list of where to look for .desktop files
   * language - a comma-separated list of languages to use for the menu, in descending order of preference. Can be either language_country, or just language. Examples: es_cl, en_ca, he, ru
   * environments - a comma-separated list of the values that appear in ShowOnlyIn fields of .desktop files. Leave empty to ignore ShowOnlyIn. Otherwise, put in the values of the environements you want to impersonate so that hidden launchers that only show in a specific environment will appear. However, if you specify even one environment then only the environments you specify will have their exclusive launchers show.

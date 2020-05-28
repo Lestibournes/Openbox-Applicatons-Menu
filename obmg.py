@@ -9,11 +9,6 @@ import sys
 #where to write out the xml:
 home = os.path.expanduser("~")
 
-destination_filename = None
-
-if sys.argv[2]:
-	destination_filename = sys.argv[2].replace("~", home)
-
 #the config file:
 config_filename = sys.argv[1].replace("~", home)
 config = json.loads(open(config_filename, "r").read())
@@ -312,6 +307,9 @@ elif "sorting" in config["global"] and config["global"]["sorting"] == "descendin
 
 output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/" >\n\n'
 
+if config["global"]["files"]["header"]:
+	output += open(config["global"]["files"]["header"].strip().replace("~", home), "r").read()
+
 if sort:
 	for menu in sorted(menus, key=lambda menu: menu, reverse=reverse):
 		if len(menus[menu]) > 0:
@@ -336,9 +334,13 @@ else:
 
 			output += '</menu>\n'
 
+if config["global"]["files"]["footer"]:
+	output += open(config["global"]["files"]["footer"].strip().replace("~", home), "r").read()
+
 output += '</openbox_pipe_menu>'
 
-if destination_filename:
-	open(destination_filename, "w").write(output)
+if config["global"]["files"]["output"]:
+	open(config["global"]["files"]["output"].strip().replace("~", home), "w").write(output)
+
 else:
 	print(output)
