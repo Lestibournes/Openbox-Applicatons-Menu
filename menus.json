@@ -16,7 +16,7 @@
             "themes": "/usr/share/icons",
             "folders": "/usr/share/icons,/usr/share/pixmaps"
         },
-        "theme": "ubuntu-mono-dark"
+        "theme": "Faenza-Ambiance"
     },
 
     "menus": {

@@ -168,7 +168,7 @@ for file in files:
 
 			# Excecutable:
 			match = re.compile(r'Exec=(.*)').search(line)
-			if match: application["exec"] = match.group(1)
+			if match: application["exec"] = match.group(1).replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
 
 			# Icon:
 			match = re.compile(r'Icon=(.+)').search(line)
