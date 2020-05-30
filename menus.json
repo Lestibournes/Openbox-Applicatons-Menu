@@ -22,7 +22,7 @@
     "menus": {
         "Internet": {
             "icon": "applications-internet",
-            "categories": "Network, X-GNOME-WebApplications",
+            "categories": "Network, WebBrowser, X-GNOME-WebApplications",
             "exclude": ""
         },
         "Games": {

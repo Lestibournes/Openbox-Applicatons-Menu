@@ -161,24 +161,24 @@ for file in files:
 			elif re.match(r'\[.+\]', line) is not None:
 				reading_names = False
 			
-			# Categories:
-			match = re.compile(r'Categories\s*=\s*(.+;(?:.+))').search(line)
-			if match: application["categories"] = [value.lower().strip() for value in match.group(1).split(";") if value]
-
-			# Environments:
-			match = re.compile(r'OnlyShowIn\s*=\s*(.+;(?:.+))').search(line)
-			if match: application["environments"] = [value.lower().strip() for value in match.group(1).split(";") if value]
-
-			# Excecutable:
-			match = re.compile(r'Exec=(.*)').search(line)
-			if match: application["exec"] = match.group(1).replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
-
-			# Icon:
-			match = re.compile(r'Icon=(.+)').search(line)
-			if match: application["icon"]["name"] = match.group(1)
-
-			# Names:
 			if reading_names:
+				# Categories:
+				match = re.compile(r'Categories\s*=\s*(.+)').search(line)
+				if match: application["categories"] = [value.lower().strip() for value in match.group(1).split(";") if value]
+
+				# Environments:
+				match = re.compile(r'OnlyShowIn\s*=\s*(.+)').search(line)
+				if match: application["environments"] = [value.lower().strip() for value in match.group(1).split(";") if value]
+
+				# Excecutable:
+				match = re.compile(r'Exec=(.*)').search(line)
+				if match: application["exec"] = match.group(1).replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
+
+				# Icon:
+				match = re.compile(r'Icon=(.+)').search(line)
+				if match: application["icon"]["name"] = match.group(1)
+
+				# Names:
 				match = re.compile(r'^Name(?:\[([a-zA-Z][a-zA-Z])(?:_([a-zA-Z][a-zA-Z]))?\])?=(.*)').search(line)
 				if (match):
 					language = None
@@ -200,9 +200,9 @@ for file in files:
 									application["names"][language] = name
 					else:
 						application["names"]["default"] = name
-			# Hidden:
-			if line == "NoDisplay=true":
-				application["visible"] = False
+				# Hidden:
+				if line == "NoDisplay=true":
+					application["visible"] = False
 
 		if not application["visible"]: continue
 
@@ -300,6 +300,7 @@ for file in files:
 				if category in menus[menu]["categories"]:
 					menus[menu]["applications"].append(application)
 					application["menus"].append(menu)
+					break
 
 # Create the xml:
 sort = False
