@@ -122,8 +122,11 @@ for menu in config["menus"]:
 files = []
 
 for dir in dirs:
-	dir = dir.strip().rstrip("/")
 	files += glob.glob(dir + "/**/*.desktop", recursive=True)
+	dir = dir.strip().rstrip("/")
+
+#getting .desktop files from /snap:
+files += glob.glob("/snap/*/current/meta/gui/*.desktop")
 
 # Reading all the .desktop files into memory:
 for file in files:
@@ -225,6 +228,9 @@ for file in files:
 		if not application["visible"]: continue
 
 		# Set the icon:
+		match = re.compile(r'(\/snap\/.+\/current)\/meta\/gui\/.+\.desktop').search(file)
+		if match:
+			application["icon"]["name"] = application["icon"]["name"].replace("${SNAP}", match.group(1))
 		# Get the icon file paths
 		if os.path.isfile(application["icon"]["name"]):
 			application["icon"]["selected"] = application["icon"]["name"]
