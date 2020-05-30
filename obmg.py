@@ -305,16 +305,15 @@ elif "sorting" in config["global"] and config["global"]["sorting"] == "descendin
 	sort = True
 	reverse = True
 
-output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/" >\n\n'
+output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/">\n\n'
 
 if config["global"]["files"]["header"]:
 	output += open(config["global"]["files"]["header"].strip().replace("~", home), "r").read()
 
 if sort:
 	for menu in sorted(menus, key=lambda menu: menu, reverse=reverse):
-		if len(menus[menu]) > 0:
-			if len(menus[menu]["applications"]) > 0:
-				output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
+		if len(menus[menu]["applications"]) > 0:
+			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
 
 			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"], reverse=reverse):
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
@@ -340,7 +339,7 @@ if config["global"]["files"]["footer"]:
 output += '</openbox_pipe_menu>'
 
 if config["global"]["files"]["output"]:
-	open(config["global"]["files"]["output"].strip().replace("~", home), "w").write(output)
+	open(config["global"]["files"]["output"].strip().replace("~", home), "w").write(output.replace("&", "&amp;"))
 
 else:
 	print(output)

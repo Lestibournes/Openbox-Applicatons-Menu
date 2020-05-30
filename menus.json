@@ -2,8 +2,8 @@
     "global": {
 		"files": {
 			"header": "",
-			"footer": "~/.config/openbox/system.xml",
-			"output": "~/.config/openbox/menu.applications.xml"
+			"footer": "",
+			"output": "~/.config/openbox/applications.xml"
 		},
         "directories": "/usr/share/applications",
         "language": "en, he",
@@ -16,7 +16,7 @@
             "themes": "/usr/share/icons",
             "folders": "/usr/share/icons,/usr/share/pixmaps"
         },
-        "theme": "Faenza-Ambiance"
+        "theme": "ubuntu-mono-dark"
     },
 
     "menus": {
