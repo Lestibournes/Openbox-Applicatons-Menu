@@ -24,7 +24,7 @@ Explanation of the config file:
   * language - a comma-separated list of languages to use for the menu, in descending order of preference. Can be either language_country, or just language. Examples: es_cl, en_ca, he, ru
   * environments - a comma-separated list of the values that appear in ShowOnlyIn fields of .desktop files. Leave empty to ignore ShowOnlyIn. Otherwise, put in the values of the environements you want to impersonate so that hidden launchers that only show in a specific environment will appear. However, if you specify even one environment then only the environments you specify will have their exclusive launchers show.
   * sorting - The direction in which to sort the menus and launchers. can be ascending or descending. Leave empty to not sort.
-  * theme - the icon theme you want to use for the icons.
+  * theme - a comma-separated list of the icon themes you want to use for the icons, in decending order of preference.
   * icons - the parameters for the icons
     * minimum - smallest icon size. Only has an effect when preference is smallest.
     * maximum - biggest icon size. Only has an effect when preference is biggest.

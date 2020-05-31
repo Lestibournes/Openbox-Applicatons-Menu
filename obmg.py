@@ -70,10 +70,7 @@ for i in range(len(langs)):
 	langs[i] = langs[i].lower().strip()
 
 #which desktop environment-exlusives to include:
-environments = config["global"]["environments"].split(",")
-
-for i in range(len(environments)):
-	environments[i] = environments[i].lower().strip()
+environments = [ environment.lower().strip() for environment in config["global"]["environments"].split(",") if environment]
 
 #icons parameters:
 min = int(config["global"]["icons"]["minimum"])
@@ -87,26 +84,34 @@ theme_names = []
 theme_folders = {}
 
 regex = re.compile(r'^Inherits\s*=\s*(.+(?:.+))')
-themes = [os.path.join(value.strip().replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
+names = [name.strip() for name in config["global"]["theme"].split(",") if name]
+paths = [value.strip().replace("~", home) for value in config["global"]["icons"]["themes"].split(",") if value]
+themes_top = [os.path.join(path.strip().replace("~", home), name) for name in names for path in paths]
+# themes = [os.path.join(value.strip().replace("~", home), config["global"]["theme"].split(",")[0]) for value in config["global"]["icons"]["themes"].split(",") if value]
+# print(themes)
 
-while len(themes) > 0:
-	theme = themes.pop(0)
-	if (os.path.exists(os.path.join(theme, "index.theme"))):
-		theme_name = os.path.basename(theme)
+for item in themes_top:
+	themes = []
+	themes.append(item)
+	
+	while len(themes) > 0:
+		theme = themes.pop(0)
+		if (os.path.exists(os.path.join(theme, "index.theme"))):
+			theme_name = os.path.basename(theme)
 
-		if theme_name not in theme_names:
-			theme_names.append(theme_name)
-			theme_folders[theme_name] = []
+			if theme_name not in theme_names:
+				theme_names.append(theme_name)
+				theme_folders[theme_name] = []
 
-		if theme not in theme_folders[theme_name]:
-			theme_folders[theme_name].append(theme)
+			if theme not in theme_folders[theme_name]:
+				theme_folders[theme_name].append(theme)
 
-		for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
-			match = regex.search(line.rstrip())
+			for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
+				match = regex.search(line.rstrip())
 
-			if (match):
-				themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
-				break
+				if (match):
+					themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
+					break
 
 #getting all the .desktop files:
 if config["global"]["sources"]["launchers"]:
@@ -157,9 +162,21 @@ for menu in config["menus"]:
 	# Exclusions:
 	menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"].split(",") if value]
 
-	# Set the menu icon:
-	setIcon(menus[menu])
+menus["Other"] = {
+	"applications": [],
+	"categories": [],
+	"exclusions": [],
+	"icon": {
+			"name": "applications-other", # the name of the icon
+			"selected": "", # the path that will be used
+			"files": {}, # a dictionary mapping icon sizes to the paths where the icons can be found
+			"scalable": ""
+		},
+}
 
+# Set the menu icons:
+for menu in menus:
+	setIcon(menus[menu])
 
 old_applications = {}
 
@@ -173,6 +190,7 @@ if config["global"]["files"]["cache"]:
 
 applications = {}
 update_cache = False
+executables = []
 
 # Reading all the .desktop files into memory:
 for file in launcher_files:
@@ -199,8 +217,6 @@ for file in launcher_files:
 		reading_names = False # whether we are in the name area.
 		
 		for line in open(file, "r").read().splitlines():
-			if not application["visible"]: break
-
 			line = line.strip()
 
 			if line == "[Desktop Entry]":
@@ -209,6 +225,9 @@ for file in launcher_files:
 				reading_names = False
 			
 			if reading_names:
+				# Hidden:
+				if line == "NoDisplay=true": application["visible"] = False
+
 				# Categories:
 				match = re.compile(r'^Categories\s*=\s*(.+)').search(line)
 				if match: application["categories"] = [value.lower().strip() for value in match.group(1).split(";") if value]
@@ -247,11 +266,10 @@ for file in launcher_files:
 									application["names"][language] = name
 					else:
 						application["names"]["default"] = name
-				# Hidden:
-				if line == "NoDisplay=true":
-					application["visible"] = False
-
-		# if not application["visible"]: continue
+		
+		# Prevent duplication:
+		if application["exec"] in executables: application["visible"] = False
+		if application["exec"] not in executables: executables.append(application["exec"])
 
 		# Select the name:
 		for lang in langs:
@@ -272,8 +290,6 @@ for file in launcher_files:
 				if environment in environments:
 					application["visible"] = True
 
-		# if not application["visible"]: continue
-
 		# Set the icon:
 		# For snaps:
 		match = re.compile(r'(\/snap\/.+\/current)\/meta\/gui\/.+\.desktop').search(file)
@@ -282,7 +298,7 @@ for file in launcher_files:
 
 		# Get the icon file paths
 		setIcon(application)
-
+		
 		applications[file] = application
 
 	elif file in old_applications:
@@ -290,6 +306,7 @@ for file in launcher_files:
 
 # Add to menus:
 for application in applications:
+	if applications[application]["visible"] and applications[application]["categories"]:
 		for menu in config["menus"]:
 			for category in applications[application]["categories"]:
 				if category in menus[menu]["exclusions"]: break
@@ -297,6 +314,9 @@ for application in applications:
 					menus[menu]["applications"].append(applications[application])
 					applications[application]["menus"].append(menu)
 					break
+	elif applications[application]["visible"]:
+		menus["Other"]["applications"].append(applications[application])
+		applications[application]["menus"].append("Other")
 
 # Create the xml:
 sort = False
