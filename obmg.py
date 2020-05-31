@@ -18,7 +18,7 @@ def setIcon(item):
 					break
 		
 		if not item["icon"]["files"]:
-			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
+			for folder in [value.strip().replace("~", home) for value in config["global"]["icons"]["folders"].split(",") if value]:
 				icon_files = glob.glob(os.path.join(folder, "*"))
 
 				if icon_files:
@@ -86,8 +86,8 @@ extensions = [".png", ".svg", ".xpm"] # filename extensions for icon files
 theme_names = []
 theme_folders = {}
 
-regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
-themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
+regex = re.compile(r'^Inherits\s*=\s*(.+(?:.+))')
+themes = [os.path.join(value.strip().replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
 
 while len(themes) > 0:
 	theme = themes.pop(0)
@@ -115,7 +115,7 @@ if config["global"]["sources"]["launchers"]:
 launcher_files = []
 
 for dir in dirs:
-	launcher_files += glob.glob(dir + "/*.desktop")
+	launcher_files += glob.glob(dir.strip().replace("~", home) + "/*.desktop")
 
 #getting .desktop files from /snap:
 if config["global"]["sources"]["snap"]:
@@ -171,13 +171,13 @@ if config["global"]["files"]["cache"]:
 		if cache_source.readable() and len(cache_old) > 2:
 			old_applications = json.loads(cache_old)
 
-	cache_destination = open(config["global"]["files"]["cache"].strip().replace("~", home), 'w')
-
 applications = {}
+update_cache = False
 
 # Reading all the .desktop files into memory:
 for file in launcher_files:
 	if os.path.isfile(file) and file not in old_applications:
+		update_cache = True
 		application = {
 			"name": "", # the name to be displayed out of all the names
 			"names": {
@@ -251,7 +251,7 @@ for file in launcher_files:
 				if line == "NoDisplay=true":
 					application["visible"] = False
 
-		if not application["visible"]: continue
+		# if not application["visible"]: continue
 
 		# Select the name:
 		for lang in langs:
@@ -265,14 +265,14 @@ for file in launcher_files:
 		if not application["name"]: application["name"] = application["names"]["default"]
 
 		# Check the environment:
-		if application["environments"]:
+		if application["environments"] and application["visible"]:
 			application["visible"] = False
 
 			for environment in application["environments"]:
 				if environment in environments:
 					application["visible"] = True
 
-		if not application["visible"]: continue
+		# if not application["visible"]: continue
 
 		# Set the icon:
 		# For snaps:
@@ -347,4 +347,5 @@ if config["global"]["files"]["output"]:
 else:
 	print(output)
 
-json.dump(applications, cache_destination, indent="\t")
+if config["global"]["files"]["cache"] and update_cache:
+	json.dump(applications, open(config["global"]["files"]["cache"].strip().replace("~", home), 'w'), indent="\t")
