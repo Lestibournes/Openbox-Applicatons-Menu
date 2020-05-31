@@ -13,9 +13,6 @@ home = os.path.expanduser("~")
 config_filename = sys.argv[1].replace("~", home)
 config = json.loads(open(config_filename, "r").read())
 
-#where to read the .desktop files from:
-dirs = config["global"]["sources"]["launchers"].split(",")
-
 #language preferences:
 langs = config["global"]["language"].split(",")
 
@@ -61,27 +58,31 @@ while len(themes) > 0:
 			break
 
 #getting all the .desktop files:
+if config["global"]["sources"]["launchers"]:
+	dirs = config["global"]["sources"]["launchers"].split(",")
+
 files = []
 
 for dir in dirs:
-	files += glob.glob(dir + "/**/*.desktop", recursive=True)
-	dir = dir.strip().rstrip("/")
+	files += glob.glob(dir + "/*.desktop")
 
 #getting .desktop files from /snap:
-files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
+if config["global"]["sources"]["snap"]:
+	files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
 
 #flatpak:
-files += glob.glob(config["global"]["sources"]["flatpak"] + "/app/*/current/active/export/share/applications/*.desktop")
+if config["global"]["sources"]["flatpak"]:
+	files += glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
 
-for folder in glob.glob(config["global"]["sources"]["flatpak"] + "/app/*/current/active/export/share/icons/*"):
-	theme_name = os.path.basename(folder)
+	for folder in glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/icons/*"):
+		theme_name = os.path.basename(folder)
 
-	if theme_name not in theme_names:
-		theme_names.append(theme_name)
-		theme_folders[theme_name] = []
+		if theme_name not in theme_names:
+			theme_names.append(theme_name)
+			theme_folders[theme_name] = []
 
-	if folder not in theme_folders[theme_name]:
-		theme_folders[theme_name].append(folder)
+		if folder not in theme_folders[theme_name]:
+			theme_folders[theme_name].append(folder)
 
 #construct the menus:
 menus = {}
