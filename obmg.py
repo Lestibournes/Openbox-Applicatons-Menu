@@ -164,11 +164,12 @@ for menu in config["menus"]:
 old_applications = {}
 
 if config["global"]["files"]["cache"]:
-	cache_source = open(config["global"]["files"]["cache"].strip().replace("~", home), 'r')
-	cache_old = cache_source.read()
+	if "--rebuild" not in sys.argv:
+		cache_source = open(config["global"]["files"]["cache"].strip().replace("~", home), 'r')
+		cache_old = cache_source.read()
 
-	if cache_source.readable() and len(cache_old) > 2:
-		old_applications = json.loads(cache_old)
+		if cache_source.readable() and len(cache_old) > 2:
+			old_applications = json.loads(cache_old)
 
 	cache_destination = open(config["global"]["files"]["cache"].strip().replace("~", home), 'w')
 
@@ -209,19 +210,19 @@ for file in launcher_files:
 			
 			if reading_names:
 				# Categories:
-				match = re.compile(r'Categories\s*=\s*(.+)').search(line)
+				match = re.compile(r'^Categories\s*=\s*(.+)').search(line)
 				if match: application["categories"] = [value.lower().strip() for value in match.group(1).split(";") if value]
 
 				# Environments:
-				match = re.compile(r'OnlyShowIn\s*=\s*(.+)').search(line)
+				match = re.compile(r'^OnlyShowIn\s*=\s*(.+)').search(line)
 				if match: application["environments"] = [value.lower().strip() for value in match.group(1).split(";") if value]
 
 				# Excecutable:
-				match = re.compile(r'Exec=(.*)').search(line)
+				match = re.compile(r'^Exec=(.*)').search(line)
 				if match: application["exec"] = match.group(1).replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
 
 				# Icon:
-				match = re.compile(r'Icon=(.+)').search(line)
+				match = re.compile(r'^Icon=(.+)').search(line)
 				if match: application["icon"]["name"] = match.group(1)
 
 				# Names:
@@ -346,23 +347,4 @@ if config["global"]["files"]["output"]:
 else:
 	print(output)
 
-# Write to cache:
-# application = {
-# 	"name": "", # the name to be displayed out of all the names
-# 	"names": {
-# 		"default": ""
-# 	}, # a dictionary mapping language codes to name strings. The default name will be stored in "default"
-# 	"icon": {
-# 		"name": "", # the name of the icon
-# 		"selected": "", # the path that will be used
-# 		"files": {}, # a dictionary mapping icon sizes to the paths where the icons can be found
-# 		"scalable": "" # a scalable icon
-# 	},
-# 	"exec": "", # The command to be executed when launching the app
-# 	"visible": True, # whether the app is to be displayed or not. Depends on isShown and ShowOnlyIn.
-# 	"environments": [], # the different environments this app is to appear in. If empty, it will appear in all environments. This depends on ShowOnlyIn
-# 	"categories": [], # the different application categories this app belongs to
-# 	"menus": [], # the different application menus this app belongs to
-# }
-
-json.dump(applications, cache_destination)
+json.dump(applications, cache_destination, indent="\t")
