@@ -41,38 +41,39 @@ themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for 
 
 while len(themes) > 0:
 	theme = themes.pop(0)
-	theme_name = os.path.basename(theme)
+	if (os.path.exists(os.path.join(theme, "index.theme"))):
+		theme_name = os.path.basename(theme)
 
-	if theme_name not in theme_names:
-		theme_names.append(theme_name)
-		theme_folders[theme_name] = []
+		if theme_name not in theme_names:
+			theme_names.append(theme_name)
+			theme_folders[theme_name] = []
 
-	if theme not in theme_folders[theme_name]:
-		theme_folders[theme_name].append(theme)
+		if theme not in theme_folders[theme_name]:
+			theme_folders[theme_name].append(theme)
 
-	for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
-		match = regex.search(line.rstrip())
+		for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
+			match = regex.search(line.rstrip())
 
-		if (match):
-			themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
-			break
+			if (match):
+				themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
+				break
 
 #getting all the .desktop files:
 if config["global"]["sources"]["launchers"]:
 	dirs = config["global"]["sources"]["launchers"].split(",")
 
-files = []
+launcher_files = []
 
 for dir in dirs:
-	files += glob.glob(dir + "/*.desktop")
+	launcher_files += glob.glob(dir + "/*.desktop")
 
 #getting .desktop files from /snap:
 if config["global"]["sources"]["snap"]:
-	files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
+	launcher_files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
 
 #flatpak:
 if config["global"]["sources"]["flatpak"]:
-	files += glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
+	launcher_files += glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
 
 	for folder in glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/icons/*"):
 		theme_name = os.path.basename(folder)
@@ -120,10 +121,10 @@ for menu in config["menus"]:
 		
 		if not menus[menu]["icon"]["files"]:
 			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
-				files = glob.glob(os.path.join(folder, "*"))
+				icon_files = glob.glob(os.path.join(folder, "*"))
 
-				if files:
-					for file in files:
+				if icon_files:
+					for file in icon_files:
 						if os.path.isfile(file) and os.path.basename(file) == menus[menu]["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == menus[menu]["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
 							menus[menu]["icon"]["selected"] = file
 							break
@@ -158,7 +159,7 @@ for menu in config["menus"]:
 		elif not menus[menu]["icon"]["selected"] and menus[menu]["icon"]["scalable"]: menus[menu]["icon"]["selected"] = menus[menu]["icon"]["scalable"][0]
 
 # Reading all the .desktop files into memory:
-for file in files:
+for file in launcher_files:
 	if not os.path.isdir(file):
 		application = {
 			"name": "", # the name to be displayed out of all the names
@@ -276,10 +277,10 @@ for file in files:
 			
 			if not application["icon"]["files"]:
 				for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
-					files = glob.glob(os.path.join(folder, "*"))
+					icon_files = glob.glob(os.path.join(folder, "*"))
 
-					if files:
-						for file in files:
+					if icon_files:
+						for file in icon_files:
 							if os.path.isfile(file) and os.path.basename(file) == application["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == application["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
 								application["icon"]["selected"] = file
 								break
