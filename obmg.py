@@ -87,13 +87,11 @@ regex = re.compile(r'^Inherits\s*=\s*(.+(?:.+))')
 names = [name.strip() for name in config["global"]["theme"].split(",") if name]
 paths = [value.strip().replace("~", home) for value in config["global"]["icons"]["themes"].split(",") if value]
 themes_top = [os.path.join(path.strip().replace("~", home), name) for name in names for path in paths]
-# themes = [os.path.join(value.strip().replace("~", home), config["global"]["theme"].split(",")[0]) for value in config["global"]["icons"]["themes"].split(",") if value]
-# print(themes)
 
 for item in themes_top:
 	themes = []
 	themes.append(item)
-	
+
 	while len(themes) > 0:
 		theme = themes.pop(0)
 		if (os.path.exists(os.path.join(theme, "index.theme"))):
