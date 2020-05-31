@@ -84,7 +84,7 @@ theme_names = []
 theme_folders = {}
 
 regex = re.compile(r'^Inherits\s*=\s*(.+(?:.+))')
-names = [name.strip() for name in config["global"]["theme"].split(",") if name]
+names = [name.strip() for name in config["global"]["icons"]["theme"].split(",") if name]
 paths = [value.strip().replace("~", home) for value in config["global"]["icons"]["themes"].split(",") if value]
 themes_top = [os.path.join(path.strip().replace("~", home), name) for name in names for path in paths]
 

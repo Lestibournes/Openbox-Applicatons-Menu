@@ -9,19 +9,19 @@
         "sources": {
             "snap": "/snap",
             "flatpak": "/var/lib/flatpak",
-            "launchers": "/usr/share/applications"
+            "launchers": "/usr/share/applications, ~/.local/share/applications"
         },
         "language": "en, he",
         "environments": "Unity, Unity7",
         "sorting": "ascending",
         "icons": {
+            "theme": "ubuntu-mono-dark, Pop, Faenza-Ambiance",
             "minimum": "24",
             "maximum": "48",
             "preference": "bigger",
             "themes": "/usr/share/icons",
-            "folders": "/usr/share/icons,/usr/share/pixmaps"
-        },
-        "theme": "ubuntu-mono-dark"
+            "folders": "/usr/share/icons, /usr/share/pixmaps, ~/.local/share/icons"
+        }
     },
 
     "menus": {
