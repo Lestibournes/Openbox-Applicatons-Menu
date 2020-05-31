@@ -4,8 +4,12 @@
 			"header": "",
 			"footer": "",
 			"output": "~/.config/openbox/applications.xml"
-		},
-        "directories": "/usr/share/applications",
+        },
+        "sources": {
+            "snap": "/snap",
+            "flatpak": "/var/lib/flatpak",
+            "launchers": "/usr/share/applications"
+        },
         "language": "en, he",
         "environments": "Unity, Unity7",
         "sorting": "ascending",

@@ -6,7 +6,7 @@ The script takes a json config file. A sample json config file is provided.
 Since it can take a few seconds, it is recommended not to execute the script each time the menu is openend. Instead, you can have the menu refresh when you log in, periodically with a cron job, or you can refresh it manually whenever you install or uninstall an application.
 
 For example, launch with:
-python obamg.py menus.json menu.xml
+python obamg.py menus.json
 
 This script hasn't been thoroughly tested and there are many improvements that can be made.
 
@@ -16,7 +16,10 @@ Explanation of the config file:
     * header - menus to be inserted before the applications menus.
     * footer - menus to be inserted after the applications menus.
     * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
-  * directories - a comma-separated list of where to look for .desktop files
+  * sources - the various sources of .desktop files.
+    * snap - the root directory for snap application installs.
+    * flatpak - the root directory for flatpak files. This will also be used for icons for flatpak applications.
+    * launchers - a comma-separated list of folders containing .desktop files in a flat structure.
   * language - a comma-separated list of languages to use for the menu, in descending order of preference. Can be either language_country, or just language. Examples: es_cl, en_ca, he, ru
   * environments - a comma-separated list of the values that appear in ShowOnlyIn fields of .desktop files. Leave empty to ignore ShowOnlyIn. Otherwise, put in the values of the environements you want to impersonate so that hidden launchers that only show in a specific environment will appear. However, if you specify even one environment then only the environments you specify will have their exclusive launchers show.
   * sorting - The direction in which to sort the menus and launchers. can be ascending or descending. Leave empty to not sort.

@@ -14,14 +14,7 @@ config_filename = sys.argv[1].replace("~", home)
 config = json.loads(open(config_filename, "r").read())
 
 #where to read the .desktop files from:
-dirs = config["global"]["directories"].split(",")
-
-#icons parameters:
-min = int(config["global"]["icons"]["minimum"])
-max = int(config["global"]["icons"]["maximum"])
-fixed_icon_size = re.compile(r'\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)\.(.+)')
-scalable_icon_size = re.compile(r'\/(.+)\/scalable\/(.*)\.(.+)')
-extensions = [".png", ".svg", ".xpm"] # filename extensions for icon files
+dirs = config["global"]["sources"]["launchers"].split(",")
 
 #language preferences:
 langs = config["global"]["language"].split(",")
@@ -34,6 +27,61 @@ environments = config["global"]["environments"].split(",")
 
 for i in range(len(environments)):
 	environments[i] = environments[i].lower().strip()
+
+#icons parameters:
+min = int(config["global"]["icons"]["minimum"])
+max = int(config["global"]["icons"]["maximum"])
+fixed_icon_size = re.compile(r'\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)\.(.+)')
+scalable_icon_size = re.compile(r'\/(.+)\/scalable\/(.*)\.(.+)')
+extensions = [".png", ".svg", ".xpm"] # filename extensions for icon files
+
+# Icon Themes:
+theme_names = []
+theme_folders = {}
+
+regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
+themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
+
+while len(themes) > 0:
+	theme = themes.pop(0)
+	theme_name = os.path.basename(theme)
+
+	if theme_name not in theme_names:
+		theme_names.append(theme_name)
+		theme_folders[theme_name] = []
+
+	if theme not in theme_folders[theme_name]:
+		theme_folders[theme_name].append(theme)
+
+	for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
+		match = regex.search(line.rstrip())
+
+		if (match):
+			themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
+			break
+
+#getting all the .desktop files:
+files = []
+
+for dir in dirs:
+	files += glob.glob(dir + "/**/*.desktop", recursive=True)
+	dir = dir.strip().rstrip("/")
+
+#getting .desktop files from /snap:
+files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
+
+#flatpak:
+files += glob.glob(config["global"]["sources"]["flatpak"] + "/app/*/current/active/export/share/applications/*.desktop")
+
+for folder in glob.glob(config["global"]["sources"]["flatpak"] + "/app/*/current/active/export/share/icons/*"):
+	theme_name = os.path.basename(folder)
+
+	if theme_name not in theme_names:
+		theme_names.append(theme_name)
+		theme_folders[theme_name] = []
+
+	if folder not in theme_folders[theme_name]:
+		theme_folders[theme_name].append(folder)
 
 #construct the menus:
 menus = {}
@@ -61,23 +109,13 @@ for menu in config["menus"]:
 	if os.path.isfile(menus[menu]["icon"]["name"]):
 		menus[menu]["icon"]["selected"] = menus[menu]["icon"]["name"]
 	else:
-		regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
-		themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
-		
-		while len(themes) > 0:
-			theme = themes.pop(0)
-			
-			extensions = [".png", ".svg", ".xpm"]
-			menus[menu]["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(theme) for f in filenames if os.path.splitext(f)[0] == menus[menu]["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-			
-			if menus[menu]["icon"]["files"]: break
-			
-			for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
-				match = regex.search(line.rstrip())
-
-				if (match):
-					themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
-					break
+		for theme_name in theme_names:
+				for folder in theme_folders[theme_name]:
+					menus[menu]["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == menus[menu]["icon"]["name"] and os.path.splitext(f)[1] in extensions]
+					if menus[menu]["icon"]["files"]:
+						break
+				if len(menus[menu]["icon"]["files"]) > 0:
+						break
 		
 		if not menus[menu]["icon"]["files"]:
 			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
@@ -117,16 +155,6 @@ for menu in config["menus"]:
 			menus[menu]["icon"]["selected"] = temp
 
 		elif not menus[menu]["icon"]["selected"] and menus[menu]["icon"]["scalable"]: menus[menu]["icon"]["selected"] = menus[menu]["icon"]["scalable"][0]
-		
-#getting all the .desktop files:
-files = []
-
-for dir in dirs:
-	files += glob.glob(dir + "/**/*.desktop", recursive=True)
-	dir = dir.strip().rstrip("/")
-
-#getting .desktop files from /snap:
-files += glob.glob("/snap/*/current/meta/gui/*.desktop")
 
 # Reading all the .desktop files into memory:
 for file in files:
@@ -228,29 +256,21 @@ for file in files:
 		if not application["visible"]: continue
 
 		# Set the icon:
+		# For snaps:
 		match = re.compile(r'(\/snap\/.+\/current)\/meta\/gui\/.+\.desktop').search(file)
 		if match:
 			application["icon"]["name"] = application["icon"]["name"].replace("${SNAP}", match.group(1))
+
 		# Get the icon file paths
 		if os.path.isfile(application["icon"]["name"]):
 			application["icon"]["selected"] = application["icon"]["name"]
 		else:
-			regex = re.compile(r'Inherits\s*=\s*(.+(?:.+))')
-			themes = [os.path.join(value.replace("~", home), config["global"]["theme"]) for value in config["global"]["icons"]["themes"].split(",") if value]
-			
-			while len(themes) > 0:
-				theme = themes.pop(0)
-
-				extensions = [".png", ".svg", ".xpm"]
-				application["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(theme) for f in filenames if os.path.splitext(f)[0] == application["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-
-				if application["icon"]["files"]: break
-
-				for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
-					match = regex.search(line.rstrip())
-
-					if (match):
-						themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
+			for theme_name in theme_names:
+				for folder in theme_folders[theme_name]:
+					application["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == application["icon"]["name"] and os.path.splitext(f)[1] in extensions]
+					if application["icon"]["files"]:
+						break
+				if len(application["icon"]["files"]) > 0:
 						break
 			
 			if not application["icon"]["files"]:
