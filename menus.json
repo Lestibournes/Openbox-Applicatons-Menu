@@ -3,7 +3,8 @@
 		"files": {
 			"header": "",
 			"footer": "",
-			"output": "~/.config/openbox/applications.xml"
+			"output": "~/.config/openbox/applications.xml",
+            "cache": "~/.config/openbox/cache.json"
         },
         "sources": {
             "snap": "/snap",

@@ -5,8 +5,58 @@ import os
 from gi.repository import Gio
 import sys
 
+def setIcon(item):
+	if os.path.isfile(item["icon"]["name"]):
+		item["icon"]["selected"] = item["icon"]["name"]
+	else:
+		for theme_name in theme_names:
+			for folder in theme_folders[theme_name]:
+				item["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == item["icon"]["name"] and os.path.splitext(f)[1] in extensions]
+				if item["icon"]["files"]:
+					break
+			if len(item["icon"]["files"]) > 0:
+					break
+		
+		if not item["icon"]["files"]:
+			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
+				icon_files = glob.glob(os.path.join(folder, "*"))
+
+				if icon_files:
+					for file in icon_files:
+						if os.path.isfile(file) and os.path.basename(file) == item["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == item["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
+							item["icon"]["selected"] = file
+							break
+		
+		# Select the icon file to use:
+		item["icon"]["scalable"] = [file for file in item["icon"]["files"] if scalable_icon_size.search(file)]
+		item["icon"]["files"] = [file for file in item["icon"]["files"] if fixed_icon_size.search(file)]
+
+		reverse = False
+		if config["global"]["icons"]["preference"] == "bigger": reverse = True
+
+		item["icon"]["files"] = sorted(item["icon"]["files"], key=(lambda file: int(fixed_icon_size.search(file).group(2))), reverse=reverse)
+		
+		temp = None
+		
+		for file in item["icon"]["files"]:
+			if not reverse:
+				if int(fixed_icon_size.search(file).group(2)) >= int(config["global"]["icons"]["minimum"]):
+					item["icon"]["selected"] = file
+					break
+				else:
+					temp = file
+			elif reverse:
+				if int(fixed_icon_size.search(file).group(2)) <= int(config["global"]["icons"]["maximum"]):
+					item["icon"]["selected"] = file
+					break
+				else:
+					temp = file
+		if not item["icon"]["selected"] and temp:
+			item["icon"]["selected"] = temp
+
+		elif not item["icon"]["selected"] and item["icon"]["scalable"]: item["icon"]["selected"] = item["icon"]["scalable"][0]
+
 #initializations:
-#where to write out the xml:
 home = os.path.expanduser("~")
 
 #the config file:
@@ -108,59 +158,25 @@ for menu in config["menus"]:
 	menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"].split(",") if value]
 
 	# Set the menu icon:
-	if os.path.isfile(menus[menu]["icon"]["name"]):
-		menus[menu]["icon"]["selected"] = menus[menu]["icon"]["name"]
-	else:
-		for theme_name in theme_names:
-				for folder in theme_folders[theme_name]:
-					menus[menu]["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == menus[menu]["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-					if menus[menu]["icon"]["files"]:
-						break
-				if len(menus[menu]["icon"]["files"]) > 0:
-						break
-		
-		if not menus[menu]["icon"]["files"]:
-			for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
-				icon_files = glob.glob(os.path.join(folder, "*"))
+	setIcon(menus[menu])
 
-				if icon_files:
-					for file in icon_files:
-						if os.path.isfile(file) and os.path.basename(file) == menus[menu]["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == menus[menu]["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
-							menus[menu]["icon"]["selected"] = file
-							break
-		
-		# Select the icon file to use:
-		menus[menu]["icon"]["scalable"] = [file for file in menus[menu]["icon"]["files"] if scalable_icon_size.search(file)]
-		menus[menu]["icon"]["files"] = [file for file in menus[menu]["icon"]["files"] if fixed_icon_size.search(file)]
 
-		reverse = False
-		if config["global"]["icons"]["preference"] == "bigger": reverse = True
+old_applications = {}
 
-		menus[menu]["icon"]["files"] = sorted(menus[menu]["icon"]["files"], key=(lambda file: int(fixed_icon_size.search(file).group(2))), reverse=reverse)
-		
-		temp = None
-		
-		for file in menus[menu]["icon"]["files"]:
-			if not reverse:
-				if int(fixed_icon_size.search(file).group(2)) >= int(config["global"]["icons"]["minimum"]):
-					menus[menu]["icon"]["selected"] = file
-					break
-				else:
-					temp = file
-			elif reverse:
-				if int(fixed_icon_size.search(file).group(2)) <= int(config["global"]["icons"]["maximum"]):
-					menus[menu]["icon"]["selected"] = file
-					break
-				else:
-					temp = file
-		if not menus[menu]["icon"]["selected"] and temp:
-			menus[menu]["icon"]["selected"] = temp
+if config["global"]["files"]["cache"]:
+	cache_source = open(config["global"]["files"]["cache"].strip().replace("~", home), 'r')
+	cache_old = cache_source.read()
 
-		elif not menus[menu]["icon"]["selected"] and menus[menu]["icon"]["scalable"]: menus[menu]["icon"]["selected"] = menus[menu]["icon"]["scalable"][0]
+	if cache_source.readable() and len(cache_old) > 2:
+		old_applications = json.loads(cache_old)
+
+	cache_destination = open(config["global"]["files"]["cache"].strip().replace("~", home), 'w')
+
+applications = {}
 
 # Reading all the .desktop files into memory:
 for file in launcher_files:
-	if not os.path.isdir(file):
+	if os.path.isfile(file) and file not in old_applications:
 		application = {
 			"name": "", # the name to be displayed out of all the names
 			"names": {
@@ -264,64 +280,21 @@ for file in launcher_files:
 			application["icon"]["name"] = application["icon"]["name"].replace("${SNAP}", match.group(1))
 
 		# Get the icon file paths
-		if os.path.isfile(application["icon"]["name"]):
-			application["icon"]["selected"] = application["icon"]["name"]
-		else:
-			for theme_name in theme_names:
-				for folder in theme_folders[theme_name]:
-					application["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == application["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-					if application["icon"]["files"]:
-						break
-				if len(application["icon"]["files"]) > 0:
-						break
-			
-			if not application["icon"]["files"]:
-				for folder in [value.strip() for value in config["global"]["icons"]["folders"].split(",") if value]:
-					icon_files = glob.glob(os.path.join(folder, "*"))
+		setIcon(application)
 
-					if icon_files:
-						for file in icon_files:
-							if os.path.isfile(file) and os.path.basename(file) == application["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == application["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
-								application["icon"]["selected"] = file
-								break
-			
-			# Select the icon file to use:
+		applications[file] = application
 
-			application["icon"]["scalable"] = [file for file in application["icon"]["files"] if scalable_icon_size.search(file)]
-			application["icon"]["files"] = [file for file in application["icon"]["files"] if fixed_icon_size.search(file)]
+	elif file in old_applications:
+		applications[file] = old_applications[file]
 
-			reverse = False
-			if config["global"]["icons"]["preference"] == "bigger": reverse = True
-
-			application["icon"]["files"] = sorted(application["icon"]["files"], key=(lambda file: int(fixed_icon_size.search(file).group(2))), reverse=reverse)
-			
-			temp = None
-			
-			for file in application["icon"]["files"]:
-				if not reverse:
-					if int(fixed_icon_size.search(file).group(2)) >= int(config["global"]["icons"]["minimum"]):
-						application["icon"]["selected"] = file
-						break
-					else:
-						temp = file
-				elif reverse:
-					if int(fixed_icon_size.search(file).group(2)) <= int(config["global"]["icons"]["maximum"]):
-						application["icon"]["selected"] = file
-						break
-					else:
-						temp = file
-			if not application["icon"]["selected"] and temp:
-				application["icon"]["selected"] = temp
-
-			elif not application["icon"]["selected"] and application["icon"]["scalable"]: application["icon"]["selected"] = application["icon"]["scalable"][0]
-
-		# Add to menus:
+# Add to menus:
+for application in applications:
 		for menu in config["menus"]:
-			for category in application["categories"]:
+			for category in applications[application]["categories"]:
 				if category in menus[menu]["exclusions"]: break
 				if category in menus[menu]["categories"]:
-					menus[menu]["applications"].append(application)
-					application["menus"].append(menu)
+					menus[menu]["applications"].append(applications[application])
+					applications[application]["menus"].append(menu)
 					break
 
 # Create the xml:
@@ -372,3 +345,24 @@ if config["global"]["files"]["output"]:
 
 else:
 	print(output)
+
+# Write to cache:
+# application = {
+# 	"name": "", # the name to be displayed out of all the names
+# 	"names": {
+# 		"default": ""
+# 	}, # a dictionary mapping language codes to name strings. The default name will be stored in "default"
+# 	"icon": {
+# 		"name": "", # the name of the icon
+# 		"selected": "", # the path that will be used
+# 		"files": {}, # a dictionary mapping icon sizes to the paths where the icons can be found
+# 		"scalable": "" # a scalable icon
+# 	},
+# 	"exec": "", # The command to be executed when launching the app
+# 	"visible": True, # whether the app is to be displayed or not. Depends on isShown and ShowOnlyIn.
+# 	"environments": [], # the different environments this app is to appear in. If empty, it will appear in all environments. This depends on ShowOnlyIn
+# 	"categories": [], # the different application categories this app belongs to
+# 	"menus": [], # the different application menus this app belongs to
+# }
+
+json.dump(applications, cache_destination)
