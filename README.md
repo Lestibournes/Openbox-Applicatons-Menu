@@ -3,12 +3,10 @@ Generate applications pipemenu for Openbox
 
 The script takes a json config file. A sample json config file is provided.
 
-Since it can take a few seconds, it is recommended not to execute the script each time the menu is openend. Instead, you can have the menu refresh when you log in, periodically with a cron job, or you can refresh it manually whenever you install or uninstall an application.
+You can choose whether to execute the script each time the menu is openend, when you log in, periodically with a cron job, or you manually whenever you install or uninstall an application, change the config file, or install or uninstall a theme.
 
 For example, launch with:
 python obamg.py menus.json
-
-This script hasn't been thoroughly tested and there are many improvements that can be made.
 
 Explanation of the config file:
 * global - the variables affecting the the script as a whole.
@@ -36,3 +34,5 @@ Explanation of the config file:
     * icon - the name of the icon to be used from the theme
     * categories - each .desktop file has categories. This lists which categories will have their launchers included in this menu
     * exclude - which categories will not have their applications included in this menu, even if those launchers should be otherwise be included.
+
+This script hasn't been thoroughly tested and there are many improvements that can be made.
