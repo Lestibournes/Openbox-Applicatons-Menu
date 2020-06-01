@@ -115,6 +115,8 @@ for file in launcher_files:
 			"menus": [], # the different application menus this app belongs to
 		}
 
+		application["exec"] = application["exec"].replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
+
 		# Set the icon name for snap applications:
 		match = re.compile(r'(\/snap\/.+\/current)\/meta\/gui\/.+\.desktop').search(file)
 		if match: application["icon"]["name"] = application["icon"]["name"].replace("${SNAP}", match.group(1))
