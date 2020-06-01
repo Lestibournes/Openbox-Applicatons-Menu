@@ -8,31 +8,25 @@ You can choose whether to execute the script each time the menu is openend, when
 For example, launch with:
 python obamg.py menus.json
 
+Currently only compatible with Python 2.7.
+
 Explanation of the config file:
-* global - the variables affecting the the script as a whole.
-  * files - the various files to be used for input output, etc.
-    * header - menus to be inserted before the applications menus.
-    * footer - menus to be inserted after the applications menus.
-    * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
-    * cache - the location of the cache file.
-  * sources - the various sources of .desktop files.
-    * snap - the root directory for snap application installs.
-    * flatpak - the root directory for flatpak files. This will also be used for icons for flatpak applications.
-    * launchers - a comma-separated list of folders containing .desktop files in a flat structure.
-  * language - a comma-separated list of languages to use for the menu, in descending order of preference. Can be either language_country, or just language. Examples: es_cl, en_ca, he, ru
-  * environments - a comma-separated list of the values that appear in ShowOnlyIn fields of .desktop files. Leave empty to ignore ShowOnlyIn. Otherwise, put in the values of the environements you want to impersonate so that hidden launchers that only show in a specific environment will appear. However, if you specify even one environment then only the environments you specify will have their exclusive launchers show.
-  * sorting - The direction in which to sort the menus and launchers. can be ascending or descending. Leave empty to not sort.
-  * icons - the parameters for the icons
-    * theme - a comma-separated list of the icon themes you want to use for the icons, in decending order of preference.
-    * minimum - smallest icon size. Only has an effect when preference is smallest.
-    * maximum - biggest icon size. Only has an effect when preference is biggest.
-      preference - whether icons will be as big as possible with maximum as the largest size or as small as possible with minimum as the smallest size. If no icon is found within the parameters then the closest size to the preferred size will be used.
-    * themes - a comma-separated list of the the base directories for the icon themes. For example: ~/.icons,/usr/share/icons
-    * folders - folders where icons can be found. These folders will be searched non-recursively, and only if an icon hasn't been found in the theme.
+
+* files - the various files to be used for input output, etc.
+  * header - menus to be inserted before the applications menus.
+  * footer - menus to be inserted after the applications menus.
+  * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
+  * cache - the location of the cache file.
+* sources - the various sources of .desktop files.
+  * snap - the root directory for snap application installs.
+  * flatpak - the root directory for flatpak files. This will also be used for icons for flatpak applications.
+  * launchers - an array of folders containing .desktop files in a flat structure.
+* environments - an array of the values that appear in ShowOnlyIn fields of .desktop files.
+* sorting - The direction in which to sort the menus and launchers. can be ascending or descending. Leave empty to not sort.
+* icons - an array of the icon themes you want to use for the icons, in decending order of preference. If this value is missing, it will use the GNOME icon theme.
+    
 * menus - a list of submenus of the applicaitons menu
   * [name] - the name of the menu
     * icon - the name of the icon to be used from the theme
-    * categories - each .desktop file has categories. This lists which categories will have their launchers included in this menu
-    * exclude - which categories will not have their applications included in this menu, even if those launchers should be otherwise be included.
-
-This script hasn't been thoroughly tested and there are many improvements that can be made.
+    * categories - an array of the categories who's applications will be included in this menu.
+    * exclude - an array of categories who's applications will be excluded from this menu. This overrides inclusion.

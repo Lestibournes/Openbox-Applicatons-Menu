@@ -1,68 +1,58 @@
 {
-    "global": {
-		"files": {
-			"header": "",
-			"footer": "",
-			"output": "~/.config/openbox/applications.xml",
-            "cache": "~/.config/openbox/cache.json"
-        },
-        "sources": {
-            "snap": "/snap",
-            "flatpak": "/var/lib/flatpak",
-            "launchers": "/usr/share/applications, ~/.local/share/applications"
-        },
-        "language": "en, he",
-        "environments": "Unity, Unity7",
-        "sorting": "ascending",
-        "icons": {
-            "theme": "ubuntu-mono-dark, Pop, Faenza-Ambiance",
-            "minimum": "24",
-            "maximum": "48",
-            "preference": "bigger",
-            "themes": "/usr/share/icons",
-            "folders": "/usr/share/icons, /usr/share/pixmaps, ~/.local/share/icons"
-        }
+    "files": {
+        "header": "",
+        "footer": "~/.config/openbox/system.xml",
+        "output": "~/.config/openbox/applications.xml",
+        "cache": "~/.config/openbox/cache.json"
     },
+    "sources": {
+        "snap": "/snap",
+        "flatpak": "/var/lib/flatpak",
+        "launchers": ["/usr/share/applications", "~/.local/share/applications"]
+    },
+    "environments": "",
+    "sorting": "ascending",
+    "icons": ["ubuntu-mono-dark", "Pop", "Faenza-Ambiance"],
 
     "menus": {
         "Internet": {
             "icon": "applications-internet",
-            "categories": "Network, WebBrowser, X-GNOME-WebApplications",
+            "categories": ["Network", "WebBrowser", "X-GNOME-WebApplications"],
             "exclude": ""
         },
         "Games": {
             "icon": "applications-games",
-            "categories": "Game, BlocksGames, ActionGames, CardGames, AdventureGames, StrategyGames, RolePlayingGames, ArcadeGames, KidsGames, LogicGames, SimulationGames, BoardGames, SportsGames",
+            "categories": ["Game", "BlocksGames", "ActionGames", "CardGames", "AdventureGames", "StrategyGames", "RolePlayingGames", "ArcadeGames", "KidsGames", "LogicGames", "SimulationGames", "BoardGames", "SportsGames"],
             "exclude": ""
         },
         "Media": {
             "icon": "applications-multimedia",
-            "categories": "Graphics, AudioVideo, Audio, Video, Recorder",
+            "categories": ["Graphics", "AudioVideo", "Audio", "Video", "Recorder"],
             "exclude": ""
         },
         "Development": {
             "icon": "applications-development",
-            "categories": "Development",
+            "categories": ["Development"],
             "exclude": ""
         },
         "Office": {
             "icon": "applications-office",
-            "categories": "Office",
+            "categories": ["Office"],
             "exclude": ""
         },
         "System": {
             "icon": "applications-system",
-            "categories": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings",
+            "categories": ["System", "Settings-System", "X-GNOME-SystemSettings", "Debian", "System-Tools", "Hardware", "HardwareSettings"],
             "exclude": ""
         },
         "Settings": {
             "icon": "preferences-system",
-            "categories": "Settings, unitycc, Personal",
-            "exclude": "System, Settings-System, X-GNOME-SystemSettings, Debian, System-Tools, Hardware, HardwareSettings"
+            "categories": ["Settings", "unitycc", "Personal"],
+            "exclude": ["System", "Settings-System", "X-GNOME-SystemSettings", "Debian", "System-Tools", "Hardware", "HardwareSettings"]
         },
         "Utilities": {
             "icon": "applications-accessories",
-            "categories": "Utility, Utility-Accessibility, X-GNOME-Utilities, X-GNOME-Menu-Applications",
+            "categories": ["Utility", "Utility-Accessibility", "X-GNOME-Utilities", "X-GNOME-Menu-Applications"],
             "exclude": ""
         }
     }
