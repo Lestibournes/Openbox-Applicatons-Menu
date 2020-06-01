@@ -8,6 +8,7 @@
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+from xdg.IconTheme import getIconPath
 import glob
 import json
 import re
@@ -15,56 +16,20 @@ import os
 from gi.repository import Gio
 import sys
 
-def setIcon(item):
-	if os.path.isfile(item["icon"]["name"]):
-		item["icon"]["selected"] = item["icon"]["name"]
-	else:
-		for theme_name in theme_names:
-			for folder in theme_folders[theme_name]:
-				item["icon"]["files"] = [os.path.join(dp, f) for dp, dn, filenames in os.walk(folder) for f in filenames if os.path.splitext(f)[0] == item["icon"]["name"] and os.path.splitext(f)[1] in extensions]
-				if item["icon"]["files"]:
-					break
-			if len(item["icon"]["files"]) > 0:
-					break
-		
-		if not item["icon"]["files"]:
-			for folder in [value.strip().replace("~", home) for value in config["global"]["icons"]["folders"].split(",") if value]:
-				icon_files = glob.glob(os.path.join(folder, "*"))
+def getIcon(icon_name):
+	if icon_name:
+		if config["global"]["icons"]["theme"]:
+			for theme_name in config["global"]["icons"]["theme"]:
+				try:
+					icon_file = getIconPath(icon_name, theme=theme_name.strip())
+					if icon_file: return icon_file
+				except TypeError: pass
+		try:
+			icon_file = getIconPath(icon_name)
+			if icon_file: return icon_file
+		except TypeError: pass
 
-				if icon_files:
-					for file in icon_files:
-						if os.path.isfile(file) and os.path.basename(file) == item["icon"]["name"] or (os.path.splitext(os.path.basename(file))[0] == item["icon"]["name"] and os.path.splitext(os.path.basename(file))[1] in extensions):
-							item["icon"]["selected"] = file
-							break
-		
-		# Select the icon file to use:
-		item["icon"]["scalable"] = [file for file in item["icon"]["files"] if scalable_icon_size.search(file)]
-		item["icon"]["files"] = [file for file in item["icon"]["files"] if fixed_icon_size.search(file)]
-
-		reverse = False
-		if config["global"]["icons"]["preference"] == "bigger": reverse = True
-
-		item["icon"]["files"] = sorted(item["icon"]["files"], key=(lambda file: int(fixed_icon_size.search(file).group(2))), reverse=reverse)
-		
-		temp = None
-		
-		for file in item["icon"]["files"]:
-			if not reverse:
-				if int(fixed_icon_size.search(file).group(2)) >= int(config["global"]["icons"]["minimum"]):
-					item["icon"]["selected"] = file
-					break
-				else:
-					temp = file
-			elif reverse:
-				if int(fixed_icon_size.search(file).group(2)) <= int(config["global"]["icons"]["maximum"]):
-					item["icon"]["selected"] = file
-					break
-				else:
-					temp = file
-		if not item["icon"]["selected"] and temp:
-			item["icon"]["selected"] = temp
-
-		elif not item["icon"]["selected"] and item["icon"]["scalable"]: item["icon"]["selected"] = item["icon"]["scalable"][0]
+	return ""
 
 #initializations:
 home = os.path.expanduser("~")
@@ -89,38 +54,6 @@ fixed_icon_size = re.compile(r'\/(.+)\/(\d+)(?:x\d+(?:@2x)?)?(?:\/(?:.*))*\/(.*)
 scalable_icon_size = re.compile(r'\/(.+)\/scalable\/(.*)\.(.+)')
 extensions = [".png", ".svg", ".xpm"] # filename extensions for icon files
 
-# Icon Themes:
-theme_names = []
-theme_folders = {}
-
-regex = re.compile(r'^Inherits\s*=\s*(.+(?:.+))')
-names = [name.strip() for name in config["global"]["icons"]["theme"].split(",") if name]
-paths = [value.strip().replace("~", home) for value in config["global"]["icons"]["themes"].split(",") if value]
-themes_top = [os.path.join(path.strip().replace("~", home), name) for name in names for path in paths]
-
-for item in themes_top:
-	themes = []
-	themes.append(item)
-
-	while len(themes) > 0:
-		theme = themes.pop(0)
-		if (os.path.exists(os.path.join(theme, "index.theme"))):
-			theme_name = os.path.basename(theme)
-
-			if theme_name not in theme_names:
-				theme_names.append(theme_name)
-				theme_folders[theme_name] = []
-
-			if theme not in theme_folders[theme_name]:
-				theme_folders[theme_name].append(theme)
-
-			for line in open(os.path.join(theme, "index.theme"), "r").read().splitlines():
-				match = regex.search(line.rstrip())
-
-				if (match):
-					themes += [os.path.join(os.path.dirname(theme), t.strip()) for t in match.group(1).split(",")]
-					break
-
 #getting all the .desktop files:
 if config["global"]["sources"]["launchers"]:
 	dirs = config["global"]["sources"]["launchers"].split(",")
@@ -131,22 +64,10 @@ for dir in dirs:
 	launcher_files += glob.glob(dir.strip().replace("~", home) + "/*.desktop")
 
 #getting .desktop files from /snap:
-if config["global"]["sources"]["snap"]:
-	launcher_files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
+if config["global"]["sources"]["snap"]: launcher_files += glob.glob(config["global"]["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
 
 #flatpak:
-if config["global"]["sources"]["flatpak"]:
-	launcher_files += glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
-
-	for folder in glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/icons/*"):
-		theme_name = os.path.basename(folder)
-
-		if theme_name not in theme_names:
-			theme_names.append(theme_name)
-			theme_folders[theme_name] = []
-
-		if folder not in theme_folders[theme_name]:
-			theme_folders[theme_name].append(folder)
+if config["global"]["sources"]["flatpak"]: launcher_files += glob.glob(config["global"]["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
 
 #construct the menus:
 menus = {}
@@ -156,12 +77,7 @@ for menu in config["menus"]:
 		"applications": [],
 		"categories": [],
 		"exclusions": [],
-		"icon": {
-				"name": config["menus"][menu]["icon"], # the name of the icon
-				"selected": "", # the path that will be used
-				"files": {}, # a dictionary mapping icon sizes to the paths where the icons can be found
-				"scalable": ""
-			},
+		"icon": getIcon(config["menus"][menu]["icon"])
 	}
 
 	# Categories:
@@ -174,17 +90,12 @@ menus["Other"] = {
 	"applications": [],
 	"categories": [],
 	"exclusions": [],
-	"icon": {
-			"name": "applications-other", # the name of the icon
-			"selected": "", # the path that will be used
-			"files": {}, # a dictionary mapping icon sizes to the paths where the icons can be found
-			"scalable": ""
-		},
+	"icon": getIcon("applications-other")
 }
 
-# Set the menu icons:
-for menu in menus:
-	setIcon(menus[menu])
+# # Set the menu icons:
+# for menu in menus:
+# 	menus[menu]["icon"]["selected"] = getIcon(menus[menu]["icon"]["name"])
 
 old_applications = {}
 
@@ -305,7 +216,7 @@ for file in launcher_files:
 			application["icon"]["name"] = application["icon"]["name"].replace("${SNAP}", match.group(1))
 
 		# Get the icon file paths
-		setIcon(application)
+		application["icon"]["selected"] = getIcon(application["icon"]["name"])
 		
 		applications[file] = application
 
@@ -344,7 +255,7 @@ if config["global"]["files"]["header"]:
 if sort:
 	for menu in sorted(menus, key=lambda menu: menu, reverse=reverse):
 		if len(menus[menu]["applications"]) > 0:
-			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
+			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"] + '">\n'
 
 			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"], reverse=reverse):
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
@@ -355,7 +266,7 @@ if sort:
 else:
 	for menu in menus:
 		if len(menus[menu]["applications"]) > 0:
-			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"]["selected"] + '">\n'
+			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"] + '">\n'
 
 			for app in menus[menu]["applications"]:
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
