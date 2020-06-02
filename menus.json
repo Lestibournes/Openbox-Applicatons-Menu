@@ -22,12 +22,12 @@
         "Education": {
         	"icon": "applications-education",
         	"categories": ["Education"],
-        	"exclude": ["Network", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
+        	"exclude": ["Network", "Games", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
         },
         "Science": {
         	"icon": "applications-science",
         	"categories": ["Science"],
-        	"exclude": ["Network", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
+        	"exclude": ["Network", "Games", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
         },
         "Games": {
             "icon": "applications-games",

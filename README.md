@@ -29,4 +29,4 @@ Explanation of the config file:
   * [name] - the name of the menu
     * icon - the name of the icon to be used from the theme
     * categories - an array of the categories who's applications will be included in this menu.
-    * exclude - an array of categories who's applications will be excluded from this menu. This overrides inclusion.
+    * exclude - (optional) an array of categories who's applications will be excluded from this menu. This overrides inclusion.

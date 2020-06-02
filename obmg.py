@@ -89,7 +89,7 @@ if config["files"]["cache"]:
 		cache_source = open(config["files"]["cache"].strip().replace("~", home), 'r')
 		cache_old = cache_source.read()
 
-		if cache_source.readable() and len(cache_old) > 2:
+		if len(cache_old) > 2:
 			old_applications = json.loads(cache_old)
 
 applications = {}
@@ -171,11 +171,11 @@ if config["files"]["header"]:
 	output += open(config["files"]["header"].strip().replace("~", home), "r").read()
 
 if sort:
-	for menu in sorted(menus, key=lambda menu: menu, reverse=reverse):
+	for menu in sorted(menus, key=lambda menu: menu.lower(), reverse=reverse):
 		if len(menus[menu]["applications"]) > 0:
 			output +='<menu id="openbox-' + menu + '" label="' + menu + '" icon="' + menus[menu]["icon"] + '">\n'
 			
-			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"], reverse=reverse):
+			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"].lower(), reverse=reverse):
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
 				output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 				output += '\t</item>\n'
