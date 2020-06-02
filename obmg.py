@@ -43,7 +43,7 @@ if not config["icons"]:
 	config["icons"] = [Gio.Settings.new("org.gnome.desktop.interface").get_string("icon-theme")]
 
 #which desktop environment-exlusives to include:
-environments = [ environment.lower().strip() for environment in config["environments"].split(",") if environment]
+environments = [ environment.lower().strip() for environment in config["environments"] if environment]
 
 #getting all the .desktop files:
 if config["sources"]["launchers"]: dirs = [value.strip() for value in config["sources"]["launchers"] if value]
@@ -71,9 +71,9 @@ for menu in config["menus"]:
 
 	# Categories:
 	menus[menu]["categories"] = [value.lower().strip() for value in config["menus"][menu]["categories"] if value]
-
+	
 	# Exclusions:
-	menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"] if value]
+	if "exclude" in config["menus"][menu]: menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"] if value]
 
 menus["Other"] = {
 	"applications": [],

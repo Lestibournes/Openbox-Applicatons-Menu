@@ -10,50 +10,56 @@
         "flatpak": "/var/lib/flatpak",
         "launchers": ["/usr/share/applications", "~/.local/share/applications"]
     },
-    "environments": "",
+    "environments": [],
     "sorting": "ascending",
-    "icons": ["ubuntu-mono-dark", "Pop", "Faenza-Ambiance"],
+    "icons": ["Papirus-Dark"],
 
     "menus": {
         "Internet": {
             "icon": "applications-internet",
-            "categories": ["Network", "WebBrowser", "X-GNOME-WebApplications"],
-            "exclude": ""
+            "categories": ["Network"]
+        },
+        "Education": {
+        	"icon": "applications-education",
+        	"categories": ["Education"],
+        	"exclude": ["Network", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
+        },
+        "Science": {
+        	"icon": "applications-science",
+        	"categories": ["Science"],
+        	"exclude": ["Network", "Graphics", "AudioVideo", "Audio", "Video", "Development", "Office", "System", "Settings", "Utility"]
         },
         "Games": {
             "icon": "applications-games",
-            "categories": ["Game", "BlocksGames", "ActionGames", "CardGames", "AdventureGames", "StrategyGames", "RolePlayingGames", "ArcadeGames", "KidsGames", "LogicGames", "SimulationGames", "BoardGames", "SportsGames"],
-            "exclude": ""
+            "categories": ["Game"]
         },
-        "Media": {
+        "Graphics": {
+            "icon": "applications-graphics",
+            "categories": ["Graphics"]
+        },
+        "Multimedia": {
             "icon": "applications-multimedia",
-            "categories": ["Graphics", "AudioVideo", "Audio", "Video", "Recorder"],
-            "exclude": ""
+            "categories": ["AudioVideo", "Audio", "Video"]
         },
         "Development": {
             "icon": "applications-development",
-            "categories": ["Development"],
-            "exclude": ""
+            "categories": ["Development"]
         },
         "Office": {
             "icon": "applications-office",
-            "categories": ["Office"],
-            "exclude": ""
+            "categories": ["Office"]
         },
         "System": {
             "icon": "applications-system",
-            "categories": ["System", "Settings-System", "X-GNOME-SystemSettings", "Debian", "System-Tools", "Hardware", "HardwareSettings"],
-            "exclude": ""
+            "categories": ["System"]
         },
         "Settings": {
             "icon": "preferences-system",
-            "categories": ["Settings", "unitycc", "Personal"],
-            "exclude": ["System", "Settings-System", "X-GNOME-SystemSettings", "Debian", "System-Tools", "Hardware", "HardwareSettings"]
+            "categories": ["Settings"]
         },
         "Utilities": {
             "icon": "applications-accessories",
-            "categories": ["Utility", "Utility-Accessibility", "X-GNOME-Utilities", "X-GNOME-Menu-Applications"],
-            "exclude": ""
+            "categories": ["Utility"]
         }
     }
 }
