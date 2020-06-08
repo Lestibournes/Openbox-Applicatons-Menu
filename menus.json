@@ -1,5 +1,6 @@
 {
-    "pipemenu": "False",
+    "pipemenu": false,
+    "id": "root-menu",
     "files": {
         "header": "",
         "footer": "~/.config/openbox/system.xml",

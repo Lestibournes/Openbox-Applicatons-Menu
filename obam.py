@@ -169,7 +169,8 @@ elif "sorting" in config and config["sorting"] == "descending".lower():
 if config["pipemenu"]:
 	output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/">\n\n'
 else:
-	output = '<?xml version="1.0" encoding="utf-8"?>\n<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/                 file:///usr/share/openbox/menu.xsd">'
+	output = '<?xml version="1.0" encoding="utf-8"?>\n<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/                 file:///usr/share/openbox/menu.xsd">\n'
+	output += '<menu id="' + config["id"] + '" label="Openbox 3">\n\n'
 
 if config["files"]["header"]:
 	output += open(config["files"]["header"].strip().replace("~", home), "r").read()
@@ -207,7 +208,7 @@ if config["files"]["footer"]:
 	output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
 
 if config["pipemenu"]:
-	output += '</openbox_pipe_menu>'
+	output += '</menu>\n</openbox_pipe_menu>'
 else:
 	output += '</openbox_menu>'
 
@@ -216,7 +217,7 @@ if config["files"]["output"]:
 
 	if sys.version_info >= (3, 0):
 		written = open(config["files"]["output"].strip().replace("~", home) + ".temp", "w").write(output)
-		
+
 		if written == len(output):
 			if os.path.exists(config["files"]["output"].strip().replace("~", home)):
 				os.remove(config["files"]["output"].strip().replace("~", home))
