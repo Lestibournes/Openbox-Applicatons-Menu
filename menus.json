@@ -1,8 +1,9 @@
 {
+    "pipemenu": "False",
     "files": {
         "header": "",
         "footer": "~/.config/openbox/system.xml",
-        "output": "~/.config/openbox/applications.xml",
+        "output": "~/.config/openbox/menu.xml",
         "cache": "~/.config/openbox/cache.json"
     },
     "sources": {
