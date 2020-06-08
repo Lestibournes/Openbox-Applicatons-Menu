@@ -166,11 +166,14 @@ elif "sorting" in config and config["sorting"] == "descending".lower():
 	sort = True
 	reverse = True
 
-if config["pipemenu"]:
+if "static" not in config or not config["static"]:
 	output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/">\n\n'
 else:
 	output = '<?xml version="1.0" encoding="utf-8"?>\n<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/                 file:///usr/share/openbox/menu.xsd">\n'
-	output += '<menu id="' + config["id"] + '" label="Openbox 3">\n\n'
+	if "id" in config:
+		output += '<menu id="' + config["id"] + '" label="Openbox 3">\n\n'
+	else:
+		output += '<menu id="root-menu" label="Openbox 3">\n\n'
 
 if config["files"]["header"]:
 	output += open(config["files"]["header"].strip().replace("~", home), "r").read()
@@ -207,7 +210,7 @@ else:
 if config["files"]["footer"]:
 	output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
 
-if config["pipemenu"]:
+if "static" not in config or not config["static"]:
 	output += '</menu>\n</openbox_pipe_menu>'
 else:
 	output += '</openbox_menu>'

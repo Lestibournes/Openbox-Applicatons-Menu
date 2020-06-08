@@ -12,6 +12,8 @@ Currently only compatible with Python 2.7.
 
 Explanation of the config file:
 
+* static - leave out or specify it with the value of false for pipemenu. Specify it with the value of true to generate a static menu.
+* id - the id of the static menu. If the manu is a pipemenu then this value is ignored. If it is missing then it will default to "root-menu".
 * files - the various files to be used for input output, etc.
   * header - menus to be inserted before the applications menus.
   * footer - menus to be inserted after the applications menus.
