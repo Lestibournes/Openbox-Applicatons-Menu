@@ -113,6 +113,7 @@ for file in launcher_files:
 			"environments": [value.lower() for value in desktop_file.getOnlyShowIn() if value], # the different environments this app is to appear in. If empty, it will appear in all environments. This depends on ShowOnlyIn
 			"categories": [value.lower() for value in desktop_file.getCategories() if value], # the different application categories this app belongs to
 			"menus": [], # the different application menus this app belongs to
+			"terminal": desktop_file.getTerminal()
 		}
 
 		application["exec"] = application["exec"].replace("%u", "").replace("%U", "").replace("%f", "").replace("%F", "").strip()
@@ -177,7 +178,10 @@ if sort:
 			
 			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"].lower(), reverse=reverse):
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
-				output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
+				if app["terminal"]:
+					output += '\t\t<action name="Execute"><command><![CDATA[' + config["terminal"] + " " + app["exec"] + ']]></command></action>\n'
+				else:
+					output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 				output += '\t</item>\n'
 
 			output += '</menu>\n'
@@ -188,7 +192,10 @@ else:
 
 			for app in menus[menu]["applications"]:
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
-				output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
+				if app["terminal"]:
+					output += '\t\t<action name="Execute"><command><![CDATA[' + config["terminal"] + " " + app["exec"] + ']]></command></action>\n'
+				else:
+					output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 				output += '\t</item>\n'
 
 			output += '</menu>\n'

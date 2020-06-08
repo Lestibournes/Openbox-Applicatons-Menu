@@ -24,6 +24,7 @@ Explanation of the config file:
 * environments - an array of the values that appear in ShowOnlyIn fields of .desktop files.
 * sorting - The direction in which to sort the menus and launchers. can be ascending or descending. Leave empty to not sort.
 * icons - an array of the icon themes you want to use for the icons, in decending order of preference. If this value is missing, it will use the GNOME icon theme.
+* terminal - the command to use to launch terminal applications.
     
 * menus - a list of submenus of the applicaitons menu
   * [name] - the name of the menu

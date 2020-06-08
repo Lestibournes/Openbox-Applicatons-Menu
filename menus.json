@@ -13,6 +13,7 @@
     "environments": [],
     "sorting": "ascending",
     "icons": ["Papirus-Dark"],
+    "terminal": "gnome-terminal -x",
 
     "menus": {
         "Internet": {
