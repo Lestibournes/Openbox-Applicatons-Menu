@@ -35,8 +35,23 @@ def getIcon(icon_name):
 home = os.path.expanduser("~")
 
 #the config file:
-config_filename = sys.argv[1].replace("~", home)
-config = json.loads(open(config_filename, "r").read())
+config = None
+local = None
+for index, arg in enumerate(sys.argv):
+	if index > 0 and os.path.exists(os.path.expanduser(arg)):
+		config = json.loads(open(os.path.expanduser(arg), "r").read())
+		local = os.path.dirname(os.path.expanduser(arg))
+
+if not config:	
+	if os.path.exists(os.path.expanduser("~/.config/obam/menu.json")):
+		config = json.loads(open(os.path.expanduser("~/.config/obam/menu.json"), "r").read())
+		local = os.path.dirname(os.path.expanduser("~/.config/obam/menu.json"))
+	elif os.path.exists("/etc/xdg/obam/menu.json"):
+		config = json.loads(open("/etc/xdg/obam/menu.json", "r").read())
+		local = os.path.dirname("/etc/xdg/obam/menu.json")
+	else:
+		print("No config file was found")
+		exit()
 
 if not config["icons"]:
 	# gsettings get org.gnome.desktop.interface icon-theme
@@ -83,14 +98,21 @@ menus["Other"] = {
 }
 
 old_applications = {}
+cache_old = None
 
-if config["files"]["cache"]:
-	if "--rebuild" not in sys.argv:
-		cache_source = open(config["files"]["cache"].strip().replace("~", home), 'r')
-		cache_old = cache_source.read()
+if "cache" in config["files"]:
+	if os.path.exists(os.path.expanduser(config["files"]["cache"]).strip()):
+		cache_source = config["files"]["cache"].strip().replace("~", home)
+	else:
+		cache_source = local + "/" + config["files"]["cache"].strip()
+else:
+	cache_source = os.path.expanduser("~/.config/obam/cache.json")
 
-		if len(cache_old) > 2:
-			old_applications = json.loads(cache_old)
+if os.path.exists(cache_source) and "--rebuild" not in sys.argv:
+	cache_old = open(cache_source, "r").read()
+
+if cache_old and len(cache_old) > 2:
+	old_applications = json.loads(cache_old)
 
 applications = {}
 update_cache = False
@@ -176,7 +198,10 @@ else:
 		output += '<menu id="root-menu" label="Openbox 3">\n\n'
 
 if config["files"]["header"]:
-	output += open(config["files"]["header"].strip().replace("~", home), "r").read()
+	if os.path.exists(os.path.expanduser(config["files"]["header"]).strip()):
+		output += open(config["files"]["header"].strip().replace("~", home), "r").read()
+	else:
+		output += open(local + "/" + config["files"]["header"].strip(), "r").read()
 
 if sort:
 	for menu in sorted(menus, key=lambda menu: menu.lower(), reverse=reverse):
@@ -208,14 +233,17 @@ else:
 			output += '</menu>\n'
 
 if config["files"]["footer"]:
-	output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
+	if os.path.exists(os.path.expanduser(config["files"]["footer"]).strip()):
+		output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
+	else:
+		output += open(local + "/" + config["files"]["footer"].strip(), "r").read()
 
 if "static" not in config or not config["static"]:
 	output += '</openbox_pipe_menu>'
 else:
 	output += '</menu>\n</openbox_menu>'
 
-if config["files"]["output"]:
+if "output" in config["files"]:
 	output = output.replace("&", "&amp;")
 
 	if sys.version_info >= (3, 0):
@@ -232,5 +260,8 @@ if config["files"]["output"]:
 else:
 	print(output)
 
-if config["files"]["cache"] and update_cache:
-	json.dump(applications, open(config["files"]["cache"].strip().replace("~", home), 'w'), indent=4)
+if update_cache:
+	if not os.path.exists(os.path.dirname(cache_source)):
+		os.makedirs(os.path.dirname(cache_source))
+	
+	json.dump(applications, open(cache_source, 'w'), indent=4)

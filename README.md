@@ -19,7 +19,7 @@ Explanation of the config file:
   * header - menus to be inserted before the applications menus.
   * footer - menus to be inserted after the applications menus.
   * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
-  * cache - the location of the cache file.
+  * cache - the location of the cache file. If not specified then ~/.config/obam/cache.json will be used.
 * sources - the various sources of .desktop files.
   * snap - the root directory for snap application installs.
   * flatpak - the root directory for flatpak files. This will also be used for icons for flatpak applications.

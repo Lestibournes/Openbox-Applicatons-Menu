@@ -14,7 +14,7 @@
     },
     "environments": [],
     "sorting": "ascending",
-    "icons": ["Papirus-Dark"],
+    "icons": ["Papirus"],
     "terminal": "gnome-terminal -x",
 
     "menus": {
