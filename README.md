@@ -8,7 +8,8 @@ You can choose whether to execute the script each time the menu is openend, when
 For example, launch with:
 python obamg.py menus.json
 
-Currently only compatible with Python 2.7.
+Requires pyxdg.
+Some icon themes may only work with Python 2.7.
 
 Explanation of the config file:
 

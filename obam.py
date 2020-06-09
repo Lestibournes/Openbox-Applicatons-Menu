@@ -211,9 +211,9 @@ if config["files"]["footer"]:
 	output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
 
 if "static" not in config or not config["static"]:
-	output += '</menu>\n</openbox_pipe_menu>'
+	output += '</openbox_pipe_menu>'
 else:
-	output += '</openbox_menu>'
+	output += '</menu>\n</openbox_menu>'
 
 if config["files"]["output"]:
 	output = output.replace("&", "&amp;")
