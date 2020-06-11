@@ -1,6 +1,12 @@
 prefix = /
 
+all:
+	
+
 install:
-	install obam $(DESTDIR)$(prefix)bin
-	install -D -t $(DESTDIR)$(prefix)etc/xdg/obam/ footer config.json
-	install -D menu.xml $(DESTDIR)$(prefix)etc/skel/.config/openbox
+	install -D -t $(DESTDIR)$(prefix)usr/bin obam
+	install -D -t $(DESTDIR)$(prefix)etc/xdg/obam footer config.json
+	install -D -t $(DESTDIR)$(prefix)etc/skel/.config/openbox menu.xml
+
+clean:
+	
