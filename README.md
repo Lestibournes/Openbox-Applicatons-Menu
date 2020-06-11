@@ -3,8 +3,13 @@ Generate applications pipemenu for Openbox
 
 You can choose whether to execute the script each time the menu is openend, when you log in, periodically with a cron job, or you manually whenever you install or uninstall an application, change the config file, or install or uninstall a theme.
 
+Install with:
+make install
+
 Launch with:
-obam.py
+obam
+
+To use it as your menu make your root-menu execute obam, or copy menu.xml to ~/.config/openbox.
 
 Requires pyxdg.
 Some icon themes may only work with Python 2.7.
