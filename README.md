@@ -1,25 +1,16 @@
 # Openbox Applications Menu
 Generate applications pipemenu for Openbox
 
-The script takes a json config file. A sample json config file is provided.
-
 You can choose whether to execute the script each time the menu is openend, when you log in, periodically with a cron job, or you manually whenever you install or uninstall an application, change the config file, or install or uninstall a theme.
 
-For example, launch with:
-python obamg.py menus.json
+Launch with:
+obam.py
 
 Requires pyxdg.
 Some icon themes may only work with Python 2.7.
 
 Explanation of the config file:
 
-* static - leave out or specify it with the value of false for pipemenu. Specify it with the value of true to generate a static menu.
-* id - the id of the static menu. If the manu is a pipemenu then this value is ignored. If it is missing then it will default to "root-menu".
-* files - the various files to be used for input output, etc.
-  * header - menus to be inserted before the applications menus.
-  * footer - menus to be inserted after the applications menus.
-  * output - where the output will be written (optional). If this parameter is not provided, the output will be written to standard output.
-  * cache - the location of the cache file. If not specified then ~/.config/obam/cache.json will be used.
 * sources - the various sources of .desktop files.
   * snap - the root directory for snap application installs.
   * flatpak - the root directory for flatpak files. This will also be used for icons for flatpak applications.
@@ -34,3 +25,7 @@ Explanation of the config file:
     * icon - the name of the icon to be used from the theme
     * categories - an array of the categories who's applications will be included in this menu.
     * exclude - (optional) an array of categories who's applications will be excluded from this menu. This overrides inclusion.
+
+If you wish to add custom menu entries befor or after the applications menu, you can do so by editing the files "header" and "footer" in the config folder, which by default should be ~/.config/obam.
+
+The XML pipemenu will be printed to standard output. A config file is not necessary, but if you with to customize the menu you may do so by editing config.json in the config folder.

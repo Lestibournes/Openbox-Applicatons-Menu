@@ -1,12 +1,4 @@
 {
-    "static": true,
-    "id": "root-menu",
-    "files": {
-        "header": "",
-        "footer": "~/.config/openbox/system.xml",
-        "output": "~/.config/openbox/applications.xml",
-        "cache": "~/.config/openbox/cache.json"
-    },
     "sources": {
         "snap": "/snap",
         "flatpak": "/var/lib/flatpak",
@@ -14,8 +6,7 @@
     },
     "environments": [],
     "sorting": "ascending",
-    "icons": ["Papirus"],
-    "terminal": "gnome-terminal -x",
+    "terminal": "x-terminal-emulator -e",
 
     "menus": {
         "Internet": {

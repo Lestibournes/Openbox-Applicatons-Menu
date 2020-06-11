@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # MIT License
 
 # Copyright (c) 2020 Yitzchak Schwarz
@@ -10,6 +12,7 @@
 
 from xdg.IconTheme import getIconPath
 from xdg.DesktopEntry import DesktopEntry
+from xdg import BaseDirectory	
 import glob
 import json
 import re
@@ -19,7 +22,7 @@ import sys
 
 def getIcon(icon_name):
 	if icon_name:
-		for theme_name in config["icons"]:
+		for theme_name in config_file["icons"]:
 			try:
 				icon_file = getIconPath(icon_name, theme=theme_name.strip())
 				if icon_file: return icon_file
@@ -31,64 +34,65 @@ def getIcon(icon_name):
 
 	return ""
 
-#initializations:
-home = os.path.expanduser("~")
+filenames = {
+	"header": "header",
+	"footer": "footer",
+	"cache": "cache.json",
+	"config": "config.json"
+}
 
-#the config file:
-config = None
-local = None
-for index, arg in enumerate(sys.argv):
-	if index > 0 and os.path.exists(os.path.expanduser(arg)):
-		config = json.loads(open(os.path.expanduser(arg), "r").read())
-		local = os.path.dirname(os.path.expanduser(arg))
+resource = "obam"
 
-if not config:	
-	if os.path.exists(os.path.expanduser("~/.config/obam/menu.json")):
-		config = json.loads(open(os.path.expanduser("~/.config/obam/menu.json"), "r").read())
-		local = os.path.dirname(os.path.expanduser("~/.config/obam/menu.json"))
-	elif os.path.exists("/etc/xdg/obam/menu.json"):
-		config = json.loads(open("/etc/xdg/obam/menu.json", "r").read())
-		local = os.path.dirname("/etc/xdg/obam/menu.json")
-	else:
-		print("No config file was found")
-		exit()
+#Default configuration:
+config_file = None
 
-if not config["icons"]:
+for path in BaseDirectory.load_config_paths(resource):
+	if os.path.exists(os.path.join(path, filenames["config"])):
+		config_file = json.load(open(os.path.join(path, filenames["config"])))
+		break
+
+if not config_file:
+	config_file = json.load(open(os.path.join("/etc/xdg/obam", filenames["config"])))
+
+config_home = BaseDirectory.save_config_path(resource)
+cache_home = BaseDirectory.save_cache_path(resource)
+
+if "icons" not in config_file:
 	# gsettings get org.gnome.desktop.interface icon-theme
-	config["icons"] = [Gio.Settings.new("org.gnome.desktop.interface").get_string("icon-theme")]
+	config_file["icons"] = [Gio.Settings.new("org.gnome.desktop.interface").get_string("icon-theme")]
 
 #which desktop environment-exlusives to include:
-environments = [ environment.lower().strip() for environment in config["environments"] if environment]
+environments = [ environment.lower().strip() for environment in config_file["environments"] if environment]
 
 #getting all the .desktop files:
-if config["sources"]["launchers"]: dirs = [value.strip() for value in config["sources"]["launchers"] if value]
+if config_file["sources"]["launchers"]: dirs = [value.strip() for value in config_file["sources"]["launchers"] if value]
 
 launcher_files = []
 
-for dir in dirs: launcher_files += glob.glob(dir.strip().replace("~", home) + "/*.desktop")
+for dir in dirs: launcher_files += glob.glob(os.path.expanduser(dir.strip()) + "/*.desktop")
 
 #getting .desktop files from /snap:
-if config["sources"]["snap"]: launcher_files += glob.glob(config["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
+if config_file["sources"]["snap"]: launcher_files += glob.glob(config_file["sources"]["snap"] +  "/*/current/meta/gui/*.desktop")
 
 #flatpak:
-if config["sources"]["flatpak"]: launcher_files += glob.glob(config["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
+if config_file["sources"]["flatpak"]: launcher_files += glob.glob(config_file["sources"]["flatpak"] + "/exports/share/applications/*.desktop")
 
 #construct the menus:
 menus = {}
 
-for menu in config["menus"]:
+for menu in config_file["menus"]:
 	menus[menu] = {
 		"applications": [],
 		"categories": [],
 		"exclusions": [],
-		"icon": getIcon(config["menus"][menu]["icon"])
+		"icon": getIcon(config_file["menus"][menu]["icon"])
 	}
 
 	# Categories:
-	menus[menu]["categories"] = [value.lower().strip() for value in config["menus"][menu]["categories"] if value]
+	menus[menu]["categories"] = [value.lower().strip() for value in config_file["menus"][menu]["categories"] if value]
 	
 	# Exclusions:
-	if "exclude" in config["menus"][menu]: menus[menu]["exclusions"] = [value.lower().strip() for value in config["menus"][menu]["exclude"] if value]
+	if "exclude" in config_file["menus"][menu]: menus[menu]["exclusions"] = [value.lower().strip() for value in config_file["menus"][menu]["exclude"] if value]
 
 menus["Other"] = {
 	"applications": [],
@@ -97,22 +101,17 @@ menus["Other"] = {
 	"icon": getIcon("applications-other")
 }
 
+# Load application data from the cache:
 old_applications = {}
 cache_old = None
-
-if "cache" in config["files"]:
-	if os.path.exists(os.path.expanduser(config["files"]["cache"]).strip()):
-		cache_source = config["files"]["cache"].strip().replace("~", home)
-	else:
-		cache_source = local + "/" + config["files"]["cache"].strip()
-else:
-	cache_source = os.path.expanduser("~/.config/obam/cache.json")
+cache_source = os.path.join(cache_home, filenames["cache"])
 
 if os.path.exists(cache_source) and "--rebuild" not in sys.argv:
-	cache_old = open(cache_source, "r").read()
+	cache_old = json.load(open(cache_source, "r"))
+	# cache_old = open(cache_source, "r").read()
 
-if cache_old and len(cache_old) > 2:
-	old_applications = json.loads(cache_old)
+if cache_old and len(cache_old) > 0:
+	old_applications = cache_old
 
 applications = {}
 update_cache = False
@@ -167,7 +166,7 @@ for file in launcher_files:
 # Add to menus:
 for application in applications:
 	if applications[application]["visible"] and applications[application]["categories"]:
-		for menu in config["menus"]:
+		for menu in config_file["menus"]:
 			for category in applications[application]["categories"]:
 				if category in menus[menu]["exclusions"]: break
 				if category in menus[menu]["categories"]:
@@ -182,26 +181,18 @@ for application in applications:
 sort = False
 reverse = False
 
-if "sorting" in config and config["sorting"] == "ascending".lower():
+if "sorting" in config_file and config_file["sorting"] == "ascending".lower():
 	sort = True
-elif "sorting" in config and config["sorting"] == "descending".lower():
+elif "sorting" in config_file and config_file["sorting"] == "descending".lower():
 	sort = True
 	reverse = True
 
-if "static" not in config or not config["static"]:
-	output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/">\n\n'
-else:
-	output = '<?xml version="1.0" encoding="utf-8"?>\n<openbox_menu xmlns="http://openbox.org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openbox.org/                 file:///usr/share/openbox/menu.xsd">\n'
-	if "id" in config:
-		output += '<menu id="' + config["id"] + '" label="Openbox 3">\n\n'
-	else:
-		output += '<menu id="root-menu" label="Openbox 3">\n\n'
+output = '<?xml version="1.0" encoding="UTF-8" ?>\n<openbox_pipe_menu xmlns="http://openbox.org/"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:schemaLocation="http://openbox.org/">\n\n'
 
-if config["files"]["header"]:
-	if os.path.exists(os.path.expanduser(config["files"]["header"]).strip()):
-		output += open(config["files"]["header"].strip().replace("~", home), "r").read()
-	else:
-		output += open(local + "/" + config["files"]["header"].strip(), "r").read()
+if os.path.exists(os.path.join(config_home, filenames["header"])):
+	output += open(os.path.join(config_home, filenames["header"]), "r").read()
+elif os.path.exists(os.path.join("/etc/xdg/obam", filenames["header"])):
+	output += open(os.path.join("/etc/xdg/obam", filenames["header"])).read()
 
 if sort:
 	for menu in sorted(menus, key=lambda menu: menu.lower(), reverse=reverse):
@@ -211,7 +202,7 @@ if sort:
 			for app in sorted(menus[menu]["applications"], key=lambda a: a["name"].lower(), reverse=reverse):
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
 				if app["terminal"]:
-					output += '\t\t<action name="Execute"><command><![CDATA[' + config["terminal"] + " " + app["exec"] + ']]></command></action>\n'
+					output += '\t\t<action name="Execute"><command><![CDATA[' + config_file["terminal"] + " " + app["exec"] + ']]></command></action>\n'
 				else:
 					output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 				output += '\t</item>\n'
@@ -225,43 +216,23 @@ else:
 			for app in menus[menu]["applications"]:
 				output += '\t<item label="' + app["name"] + '" icon="' + app["icon"]["selected"] + '">\n'
 				if app["terminal"]:
-					output += '\t\t<action name="Execute"><command><![CDATA[' + config["terminal"] + " " + app["exec"] + ']]></command></action>\n'
+					output += '\t\t<action name="Execute"><command><![CDATA[' + config_file["terminal"] + " " + app["exec"] + ']]></command></action>\n'
 				else:
 					output += '\t\t<action name="Execute"><command><![CDATA[' + app["exec"] + ']]></command></action>\n'
 				output += '\t</item>\n'
 
 			output += '</menu>\n'
 
-if config["files"]["footer"]:
-	if os.path.exists(os.path.expanduser(config["files"]["footer"]).strip()):
-		output += open(config["files"]["footer"].strip().replace("~", home), "r").read()
-	else:
-		output += open(local + "/" + config["files"]["footer"].strip(), "r").read()
-
-if "static" not in config or not config["static"]:
-	output += '</openbox_pipe_menu>'
+if os.path.exists(os.path.join(config_home, filenames["footer"])):
+	output += open(os.path.join(config_home, filenames["footer"]), "r").read()
 else:
-	output += '</menu>\n</openbox_menu>'
+	output += open(os.path.join("/etc/xdg/obam", filenames["footer"])).read()
 
-if "output" in config["files"]:
-	output = output.replace("&", "&amp;")
+output += '</openbox_pipe_menu>'
 
-	if sys.version_info >= (3, 0):
-		written = open(config["files"]["output"].strip().replace("~", home) + ".temp", "w").write(output)
-
-		if written == len(output):
-			if os.path.exists(config["files"]["output"].strip().replace("~", home)):
-				os.remove(config["files"]["output"].strip().replace("~", home))
-			
-			os.rename(config["files"]["output"].strip().replace("~", home) + ".temp", config["files"]["output"].strip().replace("~", home))
-	else:
-		open(config["files"]["output"].strip().replace("~", home), "w").write(output)
-
-else:
-	print(output)
+output = output.replace("&", "&amp;")
 
 if update_cache:
-	if not os.path.exists(os.path.dirname(cache_source)):
-		os.makedirs(os.path.dirname(cache_source))
-	
 	json.dump(applications, open(cache_source, 'w'), indent=4)
+
+print(output)
