@@ -33,4 +33,4 @@ Explanation of the config file:
 
 If you wish to add custom menu entries befor or after the applications menu, you can do so by editing the files "header" and "footer" in the config folder, which by default should be ~/.config/obam.
 
-The XML pipemenu will be printed to standard output. A config file is not necessary, but if you with to customize the menu you may do so by editing config.json in the config folder.
+The XML pipemenu will be printed to standard output. A config file is not necessary, but if you wish to customize the menu you may do so by editing config.json in the config folder.
